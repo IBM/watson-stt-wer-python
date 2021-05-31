@@ -3,8 +3,8 @@ apikey=xxxxxxxxx-xxxxx-xxxxx-xxxxxxxxxxx # pragma: allowlist secret
 service_url=https://....
 use_bearer_token=False
 base_model_name=en-US_NarrowbandModel
-language_model_id=xxxxxxxxx-xxxxx-xxxxx-xxxxxxxxxxx
-acoustic_model_id=xxxxxxxxx-xxxxx-xxxxx-xxxxxxxxxxx
+;language_model_id=xxxxxxxxx-xxxxx-xxxxx-xxxxxxxxxxx
+;acoustic_model_id=xxxxxxxxx-xxxxx-xxxxx-xxxxxxxxxxx
 ;grammar_name=
 
 [Transcriptions]
