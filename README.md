@@ -64,13 +64,13 @@ Simple python package to approximate the Word Error Rate (WER), Match Error Rate
 ## Setup
 Your config file must have references for the `reference_transcriptions_file` and `stt_transcriptions_file` properties.
 
-* **Reference file** (`reference_transcriptions_file`) is a CSV file with at least columns called `Audio File Name` and `Reference`.  The `Reference` is the actual transcription of the audio file (also known as the "ground truth" or "labeled data")
+* **Reference file** (`reference_transcriptions_file`) is a CSV file with at least columns called `Audio File Name` and `Reference`.  The `Reference` is the actual transcription of the audio file (also known as the "ground truth" or "labeled data"). NOTE: In your audio file name, make sur you put the full path (eg. ./audio1.wav)
 * **Hypothesis file** (`stt_transcriptions_file`) is a CSV file with at least columns called `Audio File Name` and `Hypothesis`.  The `Hypothesis` is the transcription of the audio file by the Speech to Text engine.  The `transcribe.py` script can create this file.
 
 ## Execution
 
 ```
-python analysis.py config.ini
+python analyze.py config.ini
 ```
 
 ## Results
