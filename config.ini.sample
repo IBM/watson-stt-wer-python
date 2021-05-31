@@ -1,0 +1,30 @@
+[SpeechToText]
+apikey=xxxxxxxxx-xxxxx-xxxxx-xxxxxxxxxxx # pragma: allowlist secret
+service_url=https://....
+use_bearer_token=False
+base_model_name=en-US_NarrowbandModel
+language_model_id=xxxxxxxxx-xxxxx-xxxxx-xxxxxxxxxxx
+acoustic_model_id=xxxxxxxxx-xxxxx-xxxxx-xxxxxxxxxxx
+;grammar_name=
+
+[Transcriptions]
+reference_transcriptions_file=reference_transcriptions.csv
+stt_transcriptions_file=stt_transcriptions.csv
+audio_file_folder=.
+
+[ErrorRateOutput]
+;Columnar file with audio file name, transcriptions, error details
+details_file=wer_details.csv
+;JSON file with number of samples, total WER, total SER
+summary_file=wer_summary.json
+
+[Transformations]
+remove_word_list=uh,uhuh,%hesitation,hesitation
+;Suggestion: Use the defaults from below
+lower_case=True
+remove_punctuation=True
+remove_multiple_spaces=True
+remove_white_space=True
+sentences_to_words=True
+strip=True
+remove_empty_strings=True
