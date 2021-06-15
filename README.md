@@ -6,14 +6,14 @@ Utilities for
 ## Installation
 Requires Python 3.x installation.
 
-All of the STT-WER-Python capabilities are installed at once:
+All of the watson-stt-wer-python dependencies are installed at once with `pip`:
 
 ```
 pip install -r requirements.txt
 ```
 
 ## Setup
-Create a copy of `config.ini.sample`.
+Create a copy of `config.ini.sample`. You'll modify this file in subsequent steps.
 ```
 cp config.ini.sample config.ini
 ```
@@ -29,7 +29,7 @@ Uses IBM Watson Speech to Text service to transcribe a folder full of audio file
 Update the parameters in your `config.ini` file.
 
 Required configuration parameters:
-* apikey - API key  for your Speech to Text instance
+* apikey - API key for your Speech to Text instance
 * service_url - Reference URL for your Speech to Text instance
 * base_model_name - Base model for Speech to Text transcription
 
@@ -59,12 +59,12 @@ file2.wav|jumped over the lazy dog
 A third column, "Reference", will be included with the reference transcription, if a `reference_transcriptions_file` is found as source.
 
 # Analysis
-Simple python package to approximate the Word Error Rate (WER), Match Error Rate (MER), Word Information Lost (WIL) and Word Information Preserved (WIP) of a transcript.
+Simple python package to approximate the Word Error Rate (WER), Match Error Rate (MER), Word Information Lost (WIL) and Word Information Preserved (WIP) of one or more transcripts.
 
 ## Setup
 Your config file must have references for the `reference_transcriptions_file` and `stt_transcriptions_file` properties.
 
-* **Reference file** (`reference_transcriptions_file`) is a CSV file with at least columns called `Audio File Name` and `Reference`.  The `Reference` is the actual transcription of the audio file (also known as the "ground truth" or "labeled data"). NOTE: In your audio file name, make sur you put the full path (eg. ./audio1.wav)
+* **Reference file** (`reference_transcriptions_file`) is a CSV file with at least columns called `Audio File Name` and `Reference`.  The `Reference` is the actual transcription of the audio file (also known as the "ground truth" or "labeled data"). NOTE: In your audio file name, make sure you put the full path (eg. ./audio1.wav)
 * **Hypothesis file** (`stt_transcriptions_file`) is a CSV file with at least columns called `Audio File Name` and `Hypothesis`.  The `Hypothesis` is the transcription of the audio file by the Speech to Text engine.  The `transcribe.py` script can create this file.
 
 ## Execution
