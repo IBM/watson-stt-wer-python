@@ -129,19 +129,29 @@ class Transcriber:
 
             try:
                 if path.exists(reference_file_name):
-                    print(f"Found reference transcriptions file - {reference_file_name} - attempting merge")
+                    print(f"Found reference transcriptions file - {reference_file_name} - attempting merge with model's transcriptions")
 
                     file1_df = pd.read_csv(report_file_name)
                     file2_df = pd.read_csv(reference_file_name)
 
-                    file2_df = file2_df[["Audio File Name", "Reference"]]
+                    missing_columns = False
+                    if not "Audio File Name" in file2_df.columns:
+                        missing_columns = True
+                        print(f"Warning: 'Audio File Name' column missing in reference transcriptions file {reference_file_name}; will not merge.")
 
-                    # Perform outer join merge
-                    comparison_result = pd.merge(file1_df,file2_df, on='Audio File Name', how='outer')
-                    #print(comparison_result)
+                    if not "Reference" in file2_df.columns:
+                        missing_columns = True
+                        print(f"Warning: 'Reference' column missing in reference transcriptions file {reference_file_name}; will not merge.")
 
-                    comparison_result.to_csv(report_file_name, index=False)
-                    print(f"Updated {report_file_name} with reference transcriptions")
+                    if not missing_columns:
+                        file2_df = file2_df[["Audio File Name", "Reference"]]
+
+                        # Perform outer join merge
+                        comparison_result = pd.merge(file1_df,file2_df, on='Audio File Name', how='outer')
+                        #print(comparison_result)
+
+                        comparison_result.to_csv(report_file_name, index=False)
+                        print(f"Updated {report_file_name} with reference transcriptions")
             except Exception as e:
                 print(f"Warning - Failed to merge reference transcriptions into {report_file_name}:",e)
 def main():
