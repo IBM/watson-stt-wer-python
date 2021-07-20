@@ -167,7 +167,7 @@ def main():
     audio_file_dir    = config.getValue("Transcriptions","audio_file_folder")
 
     files = [f for f in os.listdir(audio_file_dir)]
-    for file in files:
+    for file in sorted(files):
         if transcriber.getAudioType(file) is not None:
             transcriber.transcribe(audio_file_dir + "/" + file)
 
