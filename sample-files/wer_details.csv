@@ -1,0 +1,5 @@
+Audio File Name,Reference,Transcription,Reference (clean),Transcription (clean),WER,MER,WIL,Hits,Substitutions,Deletions,Insertions,Differences
+./vicodin.wav,I will prescribe you some Vicodin,i will prescribe you some vicating ,i will prescribe you some vicodin,i will prescribe you some vicating,16.666666666666664,16.666666666666664,30.555555555555546,5,1,0,0,['vicodin']
+./lipitor.wav,"To deal with your bad cholesterol, Lipitor would be a good option",to deal with your bad cholesterol libertor would be a good option ,to deal with your bad cholesterol lipitor would be a good option,to deal with your bad cholesterol libertor would be a good option,8.333333333333332,8.333333333333332,15.972222222222232,11,1,0,0,['lipitor']
+./tylenol.wav,Take two Tylenol for your fever,take two tylenol for your fever ,take two tylenol for your fever,take two tylenol for your fever,0.0,0.0,0.0,6,0,0,0,[]
+./ibuprofen.wav,Ibuprofen is good for your muscle aches,i be profine is good for your muscle lakes ,ibuprofen is good for your muscle aches,i be profine is good for your muscle lakes,57.14285714285714,44.44444444444444,60.317460317460316,5,2,0,2,"['aches', 'ibuprofen']"
