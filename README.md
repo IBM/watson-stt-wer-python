@@ -3,6 +3,9 @@ Utilities for
 * [Transcribing](#transcription) a set of audio files with Speech to Text (STT)
 * [Analyzing](#analysis) the error rate of the STT transcription against a known-good transcription
 
+## Medium article
+Check out this Medium article to learn more how to use it, including a YouTube video demonstration https://medium.com/@marconoel/new-python-scripts-to-measure-word-error-rate-on-watson-speech-to-text-77ecaa513f60
+
 ## Installation
 Requires Python 3.x installation.
 
