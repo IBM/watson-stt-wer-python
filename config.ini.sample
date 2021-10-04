@@ -28,3 +28,5 @@ remove_white_space=True
 sentences_to_words=True
 strip=True
 remove_empty_strings=True
+;If True, pre-processing stems words with Porter stemmer. Stemming will treat singular/plural of a word as equivalent, rather than a word error.
+stemming=False
