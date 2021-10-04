@@ -1,0 +1,9 @@
+config.ini
+reference_transcriptions.csv
+stt_transcriptions.csv
+wer_details.csv
+wer_summary.json
+*.wav
+*.mp3
+__pycache__
+.DS_Store
