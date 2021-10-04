@@ -43,6 +43,9 @@ Optional configuration parameters:
 * stt_transcriptions_file - Output file for Speech to Text transcriptions
 * audio_file_folder - Input directory containing your audio files
 * reference_transcriptions_file - Reference file for manually transcribed audio files ("labeled data" or "ground truth").  If present, will be merged into `stt_transcriptions_file` as "Reference" column
+* stemming - If True, pre-processing stems words with Porter stemmer. Stemming will treat singular/plural of a word as equivalent, rather than a word error.
+
+
 
 ## Execution
 Assuming your configuration is in `config.ini`, transcribe all the audio files in `audio_file_folder` parameter via the following command:
