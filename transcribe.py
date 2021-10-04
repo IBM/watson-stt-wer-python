@@ -37,7 +37,9 @@ class MyRecognizeCallback(RecognizeCallback):
     def on_data(self, data):
         #print(json.dumps(data, indent=2))
         try:
-            transcription = data['results'][0]["alternatives"][0]["transcript"]
+            transcription = ""
+            for result in data['results']:
+                transcription += result["alternatives"][0]["transcript"]
             #print(transcription)
             self.transcriptions.add(self.audio_file_name, transcription)
         except:
