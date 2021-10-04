@@ -13,6 +13,8 @@ import sys
 import csv
 from os.path import join, dirname
 from config import Config
+import nltk
+from nltk.stem.porter import PorterStemmer
 
 
 class AnalysisResult:
@@ -140,6 +142,7 @@ class Analyzer:
         hypothesis_dict  = self.load_csv(hypothesis_file,["Audio File Name", "Transcription"])
 
         results = AnalysisResults()
+        p_stemmer = PorterStemmer()
 
         for audio_file_name in reference_dict.keys():
             reference = reference_dict.get(audio_file_name)
@@ -152,6 +155,10 @@ class Analyzer:
             # Common pre-processing on ground truth and hypothesis
             cleaned_ref = self.transformation(reference)
             cleaned_hyp = self.transformation(hypothesis)
+
+            if self.config.getBoolean("Transformations", "stemming"):
+                cleaned_ref = [p_stemmer.stem(word) for word in cleaned_ref]
+                cleaned_hyp = [p_stemmer.stem(word) for word in cleaned_hyp]
 
             # gather all metrics at once with `compute_measures`
             measures = jiwer.compute_measures(cleaned_ref, cleaned_hyp)
