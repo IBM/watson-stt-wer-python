@@ -118,7 +118,7 @@ class Transcriber:
         #print(self.transcriptions.getData())
         data = self.transcriptions.getData()
 
-        with open(report_file_name, 'w') as csvfile:
+        with open(report_file_name, 'w', encoding='utf-8-sig') as csvfile:
             writer = csv.writer(csvfile)
             writer.writerow(csv_columns)
             writer.writerows(data.items())
