@@ -23,3 +23,8 @@ class Config:
            value = list.get(key, None)
         return value
 
+    def getKeys(self, section):
+        if section in self.config:
+            return [key for key,value in self.config.items(section)]
+        return None
+
