@@ -91,12 +91,24 @@ class Transcriber:
     def transcribe(self, filename):
         print(f"Transcribing from {filename}")
 
+        #Model connection configs
         base_model                = self.config.getValue("SpeechToText", "base_model_name")
         language_customization_id = self.config.getValue("SpeechToText", "language_model_id")
         acoustic_customization_id = self.config.getValue("SpeechToText", "acoustic_model_id")
         grammar_name              = self.config.getValue("SpeechToText", "grammar_name")
 
-        callback                  = MyRecognizeCallback(filename, self.transcriptions)
+        #Float parameter configs
+        end_of_phrase_silence_time   = float(self.config.getValue("SpeechToText", "end_of_phrase_silence_time"))
+        inactivity_timeout           =   int(self.config.getValue("SpeechToText", "inactivity_timeout"))
+        speech_detector_sensitivity  = float(self.config.getValue("SpeechToText", "speech_detector_sensitivity"))
+        background_audio_suppression = float(self.config.getValue("SpeechToText", "background_audio_suppression"))
+
+        #Boolean configs
+        interim_results              = self.config.getBoolean("SpeechToText", "interim_results")
+        audio_metrics                = self.config.getBoolean("SpeechToText", "audio_metrics")
+        smart_formatting             = self.config.getBoolean("SpeechToText", "smart_formatting")
+
+        callback = MyRecognizeCallback(filename, self.transcriptions)
 
         #print(f"Requesting transcription of {filename}")
         with open(filename, "rb") as audio_file:
@@ -107,10 +119,14 @@ class Transcriber:
                 language_customization_id=language_customization_id,
                 acoustic_customization_id=acoustic_customization_id,
                 grammar_name=grammar_name,
-                interim_results=False, #If set to "True", metrics values below must be set to "False" or the python code will break
-                audio_metrics=False,
-                end_of_phrase_silence_time=1.5,
-                inactivity_timeout=-1
+                end_of_phrase_silence_time=end_of_phrase_silence_time,
+                inactivity_timeout=inactivity_timeout,
+                speech_detector_sensitivity=speech_detector_sensitivity,
+                background_audio_suppression=background_audio_suppression,
+                smart_formatting=smart_formatting,
+                #At most one of interim_results and audio_metrics can be True
+                interim_results=interim_results, 
+                audio_metrics=audio_metrics
             )
             #print(f"Requested transcription of {filename}")
 
