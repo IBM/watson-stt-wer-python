@@ -39,12 +39,13 @@ class AnalysisResult:
         self.data["Differences"]           = str(differences).replace(';', ' ') #Replace commas for naive CSV readers
 
 class AnalysisResults:
-    def __init__(self):
+    def __init__(self, config):
         self.results = []
         self.headers = []
         self.total_words  = 0
         self.total_word_errors = 0
         self.total_sent_errors = 0
+        self.config = config
 
     def add(self, result:AnalysisResult):
         #print("Add",result.data)
@@ -69,6 +70,14 @@ class AnalysisResults:
         results["Word Error Rate"]        = round(self.total_word_errors / self.total_words, 4)
         results["Total Sentence Errors"]  = self.total_sent_errors
         results["Sentence Error Rate"]    = round(self.total_sent_errors / len(self.results), 4)
+
+        #Store transcription configuration in the summary, for ease of comparing different summary files
+        #Don't store/compare sensitive values
+        config_keys = self.config.getKeys("SpeechToText")
+        ignore_keys = ["apikey","service_url","use_bearer_token"]
+        for key in config_keys:
+            if key not in ignore_keys:
+                results[key] = self.config.getValue("SpeechToText", key)
 
         return results
 
@@ -141,7 +150,7 @@ class Analyzer:
         reference_dict   = self.load_csv(reference_file, ["Audio File Name", "Reference"])
         hypothesis_dict  = self.load_csv(hypothesis_file,["Audio File Name", "Transcription"])
 
-        results = AnalysisResults()
+        results = AnalysisResults(self.config)
         p_stemmer = PorterStemmer()
 
         for audio_file_name in reference_dict.keys():
