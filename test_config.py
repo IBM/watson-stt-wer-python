@@ -1,4 +1,3 @@
-from re import S
 import unittest, os
 from config import Config
 
