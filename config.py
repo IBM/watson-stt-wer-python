@@ -28,3 +28,11 @@ class Config:
             return [key for key,value in self.config.items(section)]
         return None
 
+    def setValue(self, section:str, key:str, value:str):
+        if section in self.config:
+           self.config.set(section, key, value)
+
+    def writeFile(self, file_name:str):
+        with open(file_name, 'w') as configfile:
+            self.config.write(configfile)
+

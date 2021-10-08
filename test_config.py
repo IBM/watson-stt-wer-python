@@ -1,5 +1,6 @@
-import unittest
+import unittest, os
 from config import Config
+
 
 def getInstance():
     return Config('config.ini.sample')
@@ -29,5 +30,17 @@ class MyTest(unittest.TestCase):
         c = getInstance()
         self.assertEqual(c.getValue('Transformations','remove_word_list'), 'uh,uhuh,%hesitation,hesitation')
 
+    def test_set_value_with_key(self):
+        c = getInstance()
+        c.setValue('SpeechToText','smart_formatting', 'True')
+        self.assertEqual(c.getValue('SpeechToText', 'smart_formatting'), 'True')
+
+    def test_write_file(self):
+        c = getInstance()
+        c.writeFile('config.ini.unit_test')
+        self.assertEqual(Config('config.ini.unit_test').getValue('SpeechToText','base_model_name'), 'en-US_NarrowbandModel')
+        os.remove('config.ini.unit_test')
+
+    
 if __name__ == '__main__':
     unittest.main()
