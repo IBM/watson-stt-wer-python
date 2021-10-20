@@ -46,12 +46,14 @@ class AnalysisResults:
         self.total_word_errors = 0
         self.total_sent_errors = 0
         self.config = config
+        self.word_map = {}
 
     def add(self, result:AnalysisResult):
-        #print("Add",result.data)
+        #Track `details_file` data
         self.results.append(result)
         self.headers = result.data.keys()
 
+        #Track `summary_file` data
         word_errors = 0
         word_errors += result.data["Substitutions"]
         word_errors += result.data["Deletions"]
@@ -61,6 +63,25 @@ class AnalysisResults:
         self.total_word_errors += word_errors
         if(word_errors > 0):
             self.total_sent_errors += 1
+
+        #Track `word_accuracy_file` data
+        for word in result.data["Reference (clean)"].split(" "):
+            tuple = self.get_tuple(word)
+            tuple['count'] = tuple['count']+1
+            tuple['error_rate'] = tuple['errors'] / tuple['count']
+        
+        for word in result.differences:
+            tuple = self.get_tuple(word)
+            tuple['errors']     = tuple['errors']+1
+            tuple['error_rate'] = tuple['errors'] / tuple['count']
+
+    def get_tuple(self, word):
+        if word not in self.word_map:
+            tuple = {'word':word, 'count':0, 'errors':0, 'error_rate':0.0}
+            self.word_map[word] = tuple
+        else:
+            tuple = self.word_map[word]
+        return tuple
 
     def get_summary(self):
         results = {}
@@ -95,7 +116,17 @@ class AnalysisResults:
         print(f"Writing summary results to {filename}")
 
         with open(filename, 'w') as jsonfile:
-            json.dump(self.get_summary(), jsonfile)
+            json.dump(self.get_summary(), jsonfile, indent=2)
+
+    def write_word_accuracy(self, filename):
+        print(f"Writing word accuracy results to {filename}")
+        csv_columns = ['word','count','errors','error_rate']
+
+        with open(filename, 'w') as csvfile:
+            writer = csv.DictWriter(csvfile, fieldnames=csv_columns)
+            writer.writeheader()
+            for word in self.word_map:
+                writer.writerow(self.word_map[word])
 
 class Analyzer:
     def __init__(self, config):
@@ -191,6 +222,7 @@ def main():
     results = analyzer.analyze()
     results.write_details(config.getValue("ErrorRateOutput","details_file"))
     results.write_summary(config.getValue("ErrorRateOutput","summary_file"))
+    results.write_word_accuracy(config.getValue("ErrorRateOutput","word_accuracy_file"))
 
 if __name__ == '__main__':
     main()
