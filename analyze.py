@@ -202,12 +202,26 @@ class Analyzer:
 
             # gather all metrics at once with `compute_measures`
             measures = jiwer.compute_measures(cleaned_ref, cleaned_hyp)
-            differences = list(set(cleaned_ref) - set(cleaned_hyp))
+            differences = self.compute_differences(cleaned_ref, cleaned_hyp)
 
             result = AnalysisResult(audio_file_name, reference, hypothesis, " ".join(cleaned_ref), " ".join(cleaned_hyp), measures, differences)
             results.add(result)
 
         return results
+
+    def compute_differences(self, ref_list, hyp_list):
+        #Simple set arithmetic does not work if the same word appears multiple times in the reference transcription
+        #differences = list(set(cleaned_ref) - set(cleaned_hyp))
+
+        differences = list()
+        for word in set(ref_list):
+            ref_count = ref_list.count(word)
+            hyp_count = hyp_list.count(word)
+            diff = ref_count - hyp_count
+            if diff > 0:
+                for _ in range(diff):
+                    differences.append(word)
+        return differences
 
 def main():
     config_file = "config.ini"
