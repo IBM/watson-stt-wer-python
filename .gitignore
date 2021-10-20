@@ -3,6 +3,7 @@ reference_transcriptions.csv
 stt_transcriptions.csv
 wer_details.csv
 wer_summary.json
+wer_word_accuracy.csv
 *.wav
 *.mp3
 __pycache__

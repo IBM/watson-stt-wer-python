@@ -26,6 +26,8 @@ audio_file_folder=.
 details_file=wer_details.csv
 ;JSON file with number of samples, total WER, total SER
 summary_file=wer_summary.json
+;Columnar file with word, total frequency, error count, error rather
+word_accuracy_file=wer_word_accuracy.csv
 
 [Transformations]
 remove_word_list=uh,uhuh,%hesitation,hesitation
