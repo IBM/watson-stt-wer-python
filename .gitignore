@@ -1,10 +1,18 @@
 config.ini
+config_*
 reference_transcriptions.csv
+reference_transcriptions_*
 stt_transcriptions.csv
 wer_details.csv
 wer_summary.json
+<<<<<<< Updated upstream
 wer_word_accuracy.csv
+=======
+audio_input*
+>>>>>>> Stashed changes
 *.wav
 *.mp3
 __pycache__
 .DS_Store
+experiments_*
+experiment_*

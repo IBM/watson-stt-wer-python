@@ -36,3 +36,13 @@ class Config:
         with open(file_name, 'w') as configfile:
             self.config.write(configfile)
 
+        #value = None
+        if section in self.config:
+           self.config.set(section, key, value)
+        return
+
+    def writeFile(self, file:str):
+        #value = None
+        with open(file, 'w') as configfile:
+            self.config.write(configfile)
+        return

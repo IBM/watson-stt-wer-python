@@ -102,6 +102,10 @@ class Transcriber:
         inactivity_timeout           =   int(self.config.getValue("SpeechToText", "inactivity_timeout"))
         speech_detector_sensitivity  = float(self.config.getValue("SpeechToText", "speech_detector_sensitivity"))
         background_audio_suppression = float(self.config.getValue("SpeechToText", "background_audio_suppression"))
+        if language_customization_id is not None:
+            customization_weight         = float(self.config.getValue("SpeechToText", "customization_weight"))
+        else:
+            customization_weight = None
 
         #Boolean configs
         interim_results              = self.config.getBoolean("SpeechToText", "interim_results")
@@ -124,8 +128,9 @@ class Transcriber:
                 speech_detector_sensitivity=speech_detector_sensitivity,
                 background_audio_suppression=background_audio_suppression,
                 smart_formatting=smart_formatting,
+                customization_weight=customization_weight,
                 #At most one of interim_results and audio_metrics can be True
-                interim_results=interim_results, 
+                interim_results=interim_results,
                 audio_metrics=audio_metrics
             )
             #print(f"Requested transcription of {filename}")
@@ -173,6 +178,7 @@ class Transcriber:
             except Exception as e:
                 print(f"Warning - Failed to merge reference transcriptions into {report_file_name}:",e)
 def main():
+
     config_file = "config.ini"
     if len(sys.argv) > 1:
        config_file = sys.argv[1]
