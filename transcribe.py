@@ -136,7 +136,8 @@ class Transcriber:
             #print(f"Requested transcription of {filename}")
 
     def report(self):
-        report_file_name = self.config.getValue("Transcriptions", "stt_transcriptions_file")
+        report_file_name = self.config.getValue("ErrorRateOutput", "output_directory") \
+                            + "/" + self.config.getValue("Transcriptions", "stt_transcriptions_file")
         csv_columns = ['Audio File Name','Transcription']
         #print(self.transcriptions.getData())
         data = self.transcriptions.getData()
@@ -194,6 +195,8 @@ def main():
     for file in sorted(files):
         if transcriber.getAudioType(file) is not None:
             transcriber.transcribe(audio_file_dir + "/" + file)
+
+    os.makedirs(config.getValue("ErrorRateOutput", "output_directory"), exist_ok=True)
 
     transcriber.report()
 

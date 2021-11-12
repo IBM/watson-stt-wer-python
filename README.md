@@ -89,8 +89,8 @@ The script creates two output files, in the file names specified by the `details
 - MER (match error rate) is the proportion of I/O word matches which are errors.
 - WIL (word information lost) is a simple approximation to the proportion of word information lost which overcomes the problems associated with the RIL (relative information lost) measure that was proposed half a century ago.
 
-## Execution - Optional Grid Execution
-Use the experiment.py script to execute a series of experients where configuration settings may change for each experiment.  This option may require customization for each specific situation.
+## Execution - Sample Experiment Execution
+Use the experiment.py script to execute a series of experiments where configuration settings may change for each experiment.  This option will require customization to set up for the specific configuration to be tested.  Changes should be made in the run_all_experiments function.
 
 ```
 python experiment.py config.ini

@@ -23,7 +23,7 @@ stt_transcriptions_file=stt_transcriptions.csv
 audio_file_folder=.
 
 [ErrorRateOutput]
-report_directory=experiments
+output_directory=output
 ;Columnar file with audio file name, transcriptions, error details
 details_file=wer_details.csv
 ;JSON file with number of samples, total WER, total SER

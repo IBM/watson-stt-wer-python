@@ -8,29 +8,23 @@ from config import Config
 import subprocess
 import os.path
 from os import path
+import glob
 
 import pandas as pd
 
-def run_experiment(config_file, report_dir):
+def run_experiment(config_file, output_dir, stt_param_name, stt_config_val):
 
-    sensitivity = 0.5
+        if type(stt_config_val) == float:
+            exp_setting = float("{:.1f}".format(stt_config_val))
+        else:
+            exp_setting = stt_config_val
 
-    while sensitivity < 0.8:
+        # Set path variables
+        experiment_dir = stt_param_name + "_" + str(exp_setting)
+        path = output_dir + "/" + stt_param_name + "_" + str(exp_setting)
 
-        sens = float("{:.1f}".format(sensitivity))
-
-        # Parent Directory path
-        experiment_dir = report_dir + "/sens" + str(sens)
-
-        # Path
-        path = experiment_dir
-
-        try:
-            os.makedirs(path)
-            #print("Directory '%s' created successfully" %directory)
-        except OSError as error:
-            pass
-            #print("Directory '%s' can not be created")
+        #Create Experiment output directory if it doesn't exist
+        os.makedirs(path, exist_ok=True)
 
         #Copy config.ini to experiment folder
         exp_config_path = path + "/" + "config.ini"
@@ -38,19 +32,24 @@ def run_experiment(config_file, report_dir):
 
         #Update config settings for the experiment
         exp_config = Config(exp_config_path)
-        exp_config.setValue('SpeechToText', 'speech_detector_sensitivity', str(sens))
 
-        details_file=path + "/" + exp_config.getValue('ErrorRateOutput', 'details_file')
+        exp_config.setValue('SpeechToText', stt_param_name, str(exp_setting))
+
+        details_file=experiment_dir + "/" + exp_config.getValue('ErrorRateOutput', 'details_file')
         exp_config.setValue('ErrorRateOutput', 'details_file', details_file)
 
-        summary_file=path + "/" + exp_config.getValue('ErrorRateOutput', 'summary_file')
+        summary_file=experiment_dir + "/" + exp_config.getValue('ErrorRateOutput', 'summary_file')
         exp_config.setValue('ErrorRateOutput', 'summary_file', summary_file)
+
+        word_accuracy_file=experiment_dir + "/" + exp_config.getValue('ErrorRateOutput', 'word_accuracy_file')
+        exp_config.setValue('ErrorRateOutput', 'word_accuracy_file', word_accuracy_file)
 
         reference_transcriptions_file=path + "/" + exp_config.getValue('Transcriptions', 'reference_transcriptions_file')
         copyfile(exp_config.getValue('Transcriptions', 'reference_transcriptions_file'), reference_transcriptions_file)
+        reference_transcriptions_file=experiment_dir + "/" + exp_config.getValue('Transcriptions', 'reference_transcriptions_file')
         exp_config.setValue('Transcriptions', 'reference_transcriptions_file', reference_transcriptions_file)
 
-        stt_transcriptions_file=path + "/" + exp_config.getValue('Transcriptions', 'stt_transcriptions_file')
+        stt_transcriptions_file=experiment_dir + "/" + exp_config.getValue('Transcriptions', 'stt_transcriptions_file')
         exp_config.setValue('Transcriptions', 'stt_transcriptions_file', stt_transcriptions_file)
 
         exp_config.writeFile(exp_config_path)
@@ -61,41 +60,43 @@ def run_experiment(config_file, report_dir):
         #Get Analysis
         subprocess.call(["python", "analyze.py", exp_config_path])
 
+def run_all_experiments(config_file, output_dir):
+
+    #Customize this function to process the configuration settings
+    #that need to be tested
+
+    #Set variable for stt configuration to iterate through
+    sensitivity = 0.3
+
+    #Iterate through possible values of the setting.
+    while sensitivity < 0.5:
+
+        #Run the experiment for the specific configuration value
+        #You must include the exact name of the stt parameter being tested
+        run_experiment(config_file, output_dir, "speech_detector_sensitivity", sensitivity)
+
+        #Move to the next value to be tested
         sensitivity = sensitivity + 0.1
 
 
-def run_report(report_dir):
+def run_report(output_dir, config):
+    print(f"Reporting from {output_dir}")
+
+    # Extract all summaries
+    wer_summary_filename = config.getValue("ErrorRateOutput", "summary_file")
+    summary_tuples = []
+    summary_files = glob.glob(f"{output_dir}/**/*{wer_summary_filename}")
+    for file in summary_files:
+        with open(file) as json_file:
+            summary_tuples.append(json.load(json_file))
 
     # Open summary file for writing
-    data_file = open(report_dir + '/experiment_summary.csv', 'w')
-
-    count = 0
-    for subdir, dirs, files in os.walk(report_dir):
-        for file in files:
-            if file == "wer_summary.json":
-                #print(os.path.join(subdir, file))
-
-                # Opening JSON file and loading the data
-                # into the variable data
-                with open(os.path.join(subdir, file)) as json_file:
-                    data = json.load(json_file)
-
-                # create the csv writer object
-                csv_writer = csv.writer(data_file)
-
-                #for result in data:
-                if count == 0:
-
-                    # Writing headers of CSV file
-                    print(data)
-                    header = data.keys()
-                    csv_writer.writerow(header)
-                    count += 1
-
-                    # Writing data of CSV file
-                csv_writer.writerow(data.values())
-
-    data_file.close()
+    output_filename = output_dir + '/experiment_summary.csv'
+    with open(output_filename, 'w') as data_file:
+        dict_writer = csv.DictWriter(data_file, fieldnames=summary_tuples[0].keys())
+        dict_writer.writeheader()
+        dict_writer.writerows(summary_tuples)
+        print(f"Wrote experiment summary to {output_filename}")
 
 def main():
 
@@ -108,12 +109,11 @@ def main():
 
     config = Config(config_file)
 
-    report_dir = os.path.relpath(os.path.dirname(os.path.abspath(__file__)), ".") \
-                + "/" + config.getValue("ErrorRateOutput", "report_directory")
+    output_dir = config.getValue("ErrorRateOutput", "output_directory")
 
-    run_experiment(config_file, report_dir)
+    run_all_experiments(config_file, output_dir)
 
-    run_report(report_dir)
+    run_report(output_dir, config)
 
 if __name__ == '__main__':
     main()

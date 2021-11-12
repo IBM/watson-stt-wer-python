@@ -7,10 +7,12 @@
 # It computes the minimum-edit distance between the ground-truth sentence and the hypothesis sentence of a speech-to-text API.
 # The minimum-edit distance is calculated using the python C module python-Levenshtein.
 
+import os
 import jiwer
 import json
 import sys
 import csv
+from shutil import copyfile
 from os.path import join, dirname
 from config import Config
 import nltk
@@ -69,7 +71,7 @@ class AnalysisResults:
             tuple = self.get_tuple(word)
             tuple['count'] = tuple['count']+1
             tuple['error_rate'] = tuple['errors'] / tuple['count']
-        
+
         for word in result.differences:
             tuple = self.get_tuple(word)
             tuple['errors']     = tuple['errors']+1
@@ -176,8 +178,10 @@ class Analyzer:
 
 
     def analyze(self):
-        reference_file   = self.config.getValue("Transcriptions","reference_transcriptions_file")
-        hypothesis_file  = self.config.getValue("Transcriptions","stt_transcriptions_file")
+        reference_file   = self.config.getValue("ErrorRateOutput", "output_directory") \
+                            + "/" + self.config.getValue("Transcriptions","reference_transcriptions_file")
+        hypothesis_file  = self.config.getValue("ErrorRateOutput", "output_directory") \
+                            + "/" + self.config.getValue("Transcriptions","stt_transcriptions_file")
         reference_dict   = self.load_csv(reference_file, ["Audio File Name", "Reference"])
         hypothesis_dict  = self.load_csv(hypothesis_file,["Audio File Name", "Transcription"])
 
@@ -233,10 +237,20 @@ def main():
     config      = Config(config_file)
     analyzer    = Analyzer(config)
 
+    os.makedirs(config.getValue("ErrorRateOutput", "output_directory"), exist_ok=True)
+
+    ref_transcriptons_file = config.getValue("ErrorRateOutput", "output_directory") \
+                        + "/" + config.getValue("Transcriptions","reference_transcriptions_file")
+    if not os.path.exists(ref_transcriptons_file):
+        copyfile(config.getValue('Transcriptions', 'reference_transcriptions_file'), ref_transcriptons_file)
+
     results = analyzer.analyze()
-    results.write_details(config.getValue("ErrorRateOutput","details_file"))
-    results.write_summary(config.getValue("ErrorRateOutput","summary_file"))
-    results.write_word_accuracy(config.getValue("ErrorRateOutput","word_accuracy_file"))
+    results.write_details(config.getValue("ErrorRateOutput", "output_directory") \
+                        + "/" + config.getValue("ErrorRateOutput","details_file"))
+    results.write_summary(config.getValue("ErrorRateOutput", "output_directory") \
+                        + "/" + config.getValue("ErrorRateOutput","summary_file"))
+    results.write_word_accuracy(config.getValue("ErrorRateOutput", "output_directory") \
+                        + "/" + config.getValue("ErrorRateOutput","word_accuracy_file"))
 
 if __name__ == '__main__':
     main()
