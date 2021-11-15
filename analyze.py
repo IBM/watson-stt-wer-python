@@ -239,10 +239,10 @@ def main():
 
     os.makedirs(config.getValue("ErrorRateOutput", "output_directory"), exist_ok=True)
 
-    ref_transcriptons_file = config.getValue("ErrorRateOutput", "output_directory") \
+    ref_transcriptions_file = config.getValue("ErrorRateOutput", "output_directory") \
                         + "/" + config.getValue("Transcriptions","reference_transcriptions_file")
-    if not os.path.exists(ref_transcriptons_file):
-        copyfile(config.getValue('Transcriptions', 'reference_transcriptions_file'), ref_transcriptons_file)
+    if not os.path.exists(ref_transcriptions_file):
+        copyfile(config.getValue('Transcriptions', 'reference_transcriptions_file'), ref_transcriptions_file)
 
     results = analyzer.analyze()
     results.write_details(config.getValue("ErrorRateOutput", "output_directory") \
