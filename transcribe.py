@@ -191,12 +191,12 @@ def main():
 
     audio_file_dir    = config.getValue("Transcriptions","audio_file_folder")
 
+    os.makedirs(config.getValue("ErrorRateOutput", "output_directory"), exist_ok=True)
+
     files = [f for f in os.listdir(audio_file_dir)]
     for file in sorted(files):
         if transcriber.getAudioType(file) is not None:
             transcriber.transcribe(audio_file_dir + "/" + file)
-
-    os.makedirs(config.getValue("ErrorRateOutput", "output_directory"), exist_ok=True)
 
     transcriber.report()
 
