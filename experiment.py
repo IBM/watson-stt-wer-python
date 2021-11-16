@@ -19,14 +19,12 @@ def run_experiment(config_file, output_dir, stt_param_name, stt_config_val):
         else:
             exp_setting = stt_config_val
 
-        # Set path variables
+        # Set path variables & create output directory
         experiment_dir = stt_param_name + "_" + str(exp_setting)
-        path = output_dir + "/" + stt_param_name + "_" + str(exp_setting)
 
-        #Create Experiment output directory if it doesn't exist
+        path = output_dir + "/" + stt_param_name + "_" + str(exp_setting)
         os.makedirs(path, exist_ok=True)
 
-        #Copy config.ini to experiment folder
         exp_config_path = path + "/" + "config.ini"
         copyfile(config_file, exp_config_path)
 
@@ -109,6 +107,8 @@ def main():
     config = Config(config_file)
 
     output_dir = os.path.dirname(config.getValue("Output", "summary_file"))
+    if output_dir is None or len(output_dir) == 0:
+        output_dir = "."
     #print(output_dir)
 
     run_all_experiments(config_file, output_dir)

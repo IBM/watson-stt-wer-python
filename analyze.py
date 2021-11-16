@@ -236,8 +236,9 @@ def main():
     analyzer    = Analyzer(config)
 
     output_dir = os.path.dirname(config.getValue("Output", "summary_file"))
-    os.makedirs(output_dir, exist_ok=True)
-
+    if output_dir is not None and len(output_dir) > 0:
+        os.makedirs(output_dir, exist_ok=True)
+        
     results = analyzer.analyze()
     results.write_details(config.getValue("Output","details_file"))
     results.write_summary(config.getValue("Output","summary_file"))
