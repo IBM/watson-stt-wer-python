@@ -35,22 +35,21 @@ def run_experiment(config_file, output_dir, stt_param_name, stt_config_val):
 
         exp_config.setValue('SpeechToText', stt_param_name, str(exp_setting))
 
-        details_file=experiment_dir + "/" + exp_config.getValue('ErrorRateOutput', 'details_file')
-        exp_config.setValue('ErrorRateOutput', 'details_file', details_file)
+        file_info = os.path.split(exp_config.getValue('Output', 'details_file'))
+        details_file = os.path.join(file_info[0], experiment_dir, file_info[1])
+        exp_config.setValue('Output', 'details_file', details_file)
 
-        summary_file=experiment_dir + "/" + exp_config.getValue('ErrorRateOutput', 'summary_file')
-        exp_config.setValue('ErrorRateOutput', 'summary_file', summary_file)
+        file_info = os.path.split(exp_config.getValue('Output', 'summary_file'))
+        details_file = os.path.join(file_info[0], experiment_dir, file_info[1])
+        exp_config.setValue('Output', 'summary_file', details_file)
 
-        word_accuracy_file=experiment_dir + "/" + exp_config.getValue('ErrorRateOutput', 'word_accuracy_file')
-        exp_config.setValue('ErrorRateOutput', 'word_accuracy_file', word_accuracy_file)
+        file_info = os.path.split(exp_config.getValue('Output', 'word_accuracy_file'))
+        details_file = os.path.join(file_info[0], experiment_dir, file_info[1])
+        exp_config.setValue('Output', 'word_accuracy_file', details_file)
 
-        reference_transcriptions_file=path + "/" + exp_config.getValue('Transcriptions', 'reference_transcriptions_file')
-        copyfile(exp_config.getValue('Transcriptions', 'reference_transcriptions_file'), reference_transcriptions_file)
-        reference_transcriptions_file=experiment_dir + "/" + exp_config.getValue('Transcriptions', 'reference_transcriptions_file')
-        exp_config.setValue('Transcriptions', 'reference_transcriptions_file', reference_transcriptions_file)
-
-        stt_transcriptions_file=experiment_dir + "/" + exp_config.getValue('Transcriptions', 'stt_transcriptions_file')
-        exp_config.setValue('Transcriptions', 'stt_transcriptions_file', stt_transcriptions_file)
+        file_info = os.path.split(exp_config.getValue('Output', 'stt_transcriptions_file'))
+        details_file = os.path.join(file_info[0], experiment_dir, file_info[1])
+        exp_config.setValue('Output', 'stt_transcriptions_file', details_file)
 
         exp_config.writeFile(exp_config_path)
 
@@ -83,7 +82,7 @@ def run_report(output_dir, config):
     print(f"Reporting from {output_dir}")
 
     # Extract all summaries
-    wer_summary_filename = config.getValue("ErrorRateOutput", "summary_file")
+    wer_summary_filename = os.path.split(config.getValue("Output", "summary_file"))[1]
     summary_tuples = []
     summary_files = glob.glob(f"{output_dir}/**/*{wer_summary_filename}")
     for file in summary_files:
@@ -109,7 +108,8 @@ def main():
 
     config = Config(config_file)
 
-    output_dir = config.getValue("ErrorRateOutput", "output_directory")
+    output_dir = os.path.dirname(config.getValue("Output", "summary_file"))
+    print(output_dir)
 
     run_all_experiments(config_file, output_dir)
 

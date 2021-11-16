@@ -17,19 +17,19 @@ smart_formatting=False
 interim_results=False
 audio_metrics=False
 
-[Transcriptions]
+[Input]
 reference_transcriptions_file=reference_transcriptions.csv
-stt_transcriptions_file=stt_transcriptions.csv
 audio_file_folder=.
 
-[ErrorRateOutput]
-output_directory=output
+[Output]
 ;Columnar file with audio file name, transcriptions, error details
-details_file=wer_details.csv
+details_file=output/wer_details.csv
 ;JSON file with number of samples, total WER, total SER
-summary_file=wer_summary.json
+summary_file=output/wer_summary.json
 ;Columnar file with word, total frequency, error count, error rather
-word_accuracy_file=wer_word_accuracy.csv
+word_accuracy_file=output/wer_word_accuracy.csv
+;JSON file with STT output
+stt_transcriptions_file=output/stt_transcriptions.csv
 
 [Transformations]
 remove_word_list=uh,uhuh,%hesitation,hesitation
