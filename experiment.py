@@ -109,7 +109,7 @@ def main():
     config = Config(config_file)
 
     output_dir = os.path.dirname(config.getValue("Output", "summary_file"))
-    print(output_dir)
+    #print(output_dir)
 
     run_all_experiments(config_file, output_dir)
 
