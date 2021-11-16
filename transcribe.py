@@ -190,13 +190,14 @@ def main():
 
     audio_file_dir    = config.getValue("Input","audio_file_folder")
 
+    output_dir = os.path.dirname(config.getValue("Output", "summary_file"))
+    os.makedirs(output_dir, exist_ok=True)
+
     files = [f for f in os.listdir(audio_file_dir)]
     for file in sorted(files):
         if transcriber.getAudioType(file) is not None:
             transcriber.transcribe(audio_file_dir + "/" + file)
 
-    output_dir = os.path.dirname(config.getValue("Output", "summary_file"))
-    os.makedirs(output_dir, exist_ok=True)
 
     transcriber.report()
 
