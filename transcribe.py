@@ -191,7 +191,8 @@ def main():
     audio_file_dir    = config.getValue("Input","audio_file_folder")
 
     output_dir = os.path.dirname(config.getValue("Output", "summary_file"))
-    os.makedirs(output_dir, exist_ok=True)
+    if output_dir is not None and len(output_dir) > 0:
+        os.makedirs(output_dir, exist_ok=True)
 
     files = [f for f in os.listdir(audio_file_dir)]
     for file in sorted(files):
