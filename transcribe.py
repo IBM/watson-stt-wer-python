@@ -136,7 +136,7 @@ class Transcriber:
             #print(f"Requested transcription of {filename}")
 
     def report(self):
-        report_file_name = self.config.getValue("Output", "stt_transcriptions_file")
+        report_file_name = self.config.getValue("Transcriptions", "stt_transcriptions_file")
         csv_columns = ['Audio File Name','Transcription']
         #print(self.transcriptions.getData())
         data = self.transcriptions.getData()
@@ -147,7 +147,7 @@ class Transcriber:
             writer.writerows(data.items())
             print(f"Wrote transcriptions for {len(data)} audio files to {report_file_name}")
 
-        reference_file_name = self.config.getValue("Input", "reference_transcriptions_file")
+        reference_file_name = self.config.getValue("Transcriptions", "reference_transcriptions_file")
         if reference_file_name is not None:
 
             try:
@@ -188,9 +188,9 @@ def main():
     config      = Config(config_file)
     transcriber = Transcriber(config)
 
-    audio_file_dir    = config.getValue("Input","audio_file_folder")
+    audio_file_dir    = config.getValue("Transcriptions","audio_file_folder")
 
-    output_dir = os.path.dirname(config.getValue("Output", "summary_file"))
+    output_dir = os.path.dirname(config.getValue("ErrorRateOutput", "summary_file"))
     if output_dir is not None and len(output_dir) > 0:
         os.makedirs(output_dir, exist_ok=True)
 

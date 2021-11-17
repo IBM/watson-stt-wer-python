@@ -178,8 +178,8 @@ class Analyzer:
 
 
     def analyze(self):
-        reference_file   = self.config.getValue("Input","reference_transcriptions_file")
-        hypothesis_file  = self.config.getValue("Output","stt_transcriptions_file")
+        reference_file   = self.config.getValue("Transcriptions","reference_transcriptions_file")
+        hypothesis_file  = self.config.getValue("Transcriptions","stt_transcriptions_file")
         reference_dict   = self.load_csv(reference_file, ["Audio File Name", "Reference"])
         hypothesis_dict  = self.load_csv(hypothesis_file,["Audio File Name", "Transcription"])
 
@@ -235,14 +235,14 @@ def main():
     config      = Config(config_file)
     analyzer    = Analyzer(config)
 
-    output_dir = os.path.dirname(config.getValue("Output", "summary_file"))
+    output_dir = os.path.dirname(config.getValue("ErrorRateOutput", "summary_file"))
     if output_dir is not None and len(output_dir) > 0:
         os.makedirs(output_dir, exist_ok=True)
-        
+
     results = analyzer.analyze()
-    results.write_details(config.getValue("Output","details_file"))
-    results.write_summary(config.getValue("Output","summary_file"))
-    results.write_word_accuracy(config.getValue("Output","word_accuracy_file"))
+    results.write_details(config.getValue("ErrorRateOutput","details_file"))
+    results.write_summary(config.getValue("ErrorRateOutput","summary_file"))
+    results.write_word_accuracy(config.getValue("ErrorRateOutput","word_accuracy_file"))
 
 if __name__ == '__main__':
     main()

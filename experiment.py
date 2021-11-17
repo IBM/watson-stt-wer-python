@@ -33,21 +33,21 @@ def run_experiment(config_file, output_dir, stt_param_name, stt_config_val):
 
         exp_config.setValue('SpeechToText', stt_param_name, str(exp_setting))
 
-        file_info = os.path.split(exp_config.getValue('Output', 'details_file'))
+        file_info = os.path.split(exp_config.getValue('ErrorRateOutput', 'details_file'))
         details_file = os.path.join(file_info[0], experiment_dir, file_info[1])
-        exp_config.setValue('Output', 'details_file', details_file)
+        exp_config.setValue('ErrorRateOutput', 'details_file', details_file)
 
-        file_info = os.path.split(exp_config.getValue('Output', 'summary_file'))
+        file_info = os.path.split(exp_config.getValue('ErrorRateOutput', 'summary_file'))
         details_file = os.path.join(file_info[0], experiment_dir, file_info[1])
-        exp_config.setValue('Output', 'summary_file', details_file)
+        exp_config.setValue('ErrorRateOutput', 'summary_file', details_file)
 
-        file_info = os.path.split(exp_config.getValue('Output', 'word_accuracy_file'))
+        file_info = os.path.split(exp_config.getValue('ErrorRateOutput', 'word_accuracy_file'))
         details_file = os.path.join(file_info[0], experiment_dir, file_info[1])
-        exp_config.setValue('Output', 'word_accuracy_file', details_file)
+        exp_config.setValue('ErrorRateOutput', 'word_accuracy_file', details_file)
 
-        file_info = os.path.split(exp_config.getValue('Output', 'stt_transcriptions_file'))
+        file_info = os.path.split(exp_config.getValue('Transcriptions', 'stt_transcriptions_file'))
         details_file = os.path.join(file_info[0], experiment_dir, file_info[1])
-        exp_config.setValue('Output', 'stt_transcriptions_file', details_file)
+        exp_config.setValue('Transcriptions', 'stt_transcriptions_file', details_file)
 
         exp_config.writeFile(exp_config_path)
 
@@ -80,7 +80,7 @@ def run_report(output_dir, config):
     print(f"Reporting from {output_dir}")
 
     # Extract all summaries
-    wer_summary_filename = os.path.split(config.getValue("Output", "summary_file"))[1]
+    wer_summary_filename = os.path.split(config.getValue("ErrorRateOutput", "summary_file"))[1]
     summary_tuples = []
     summary_files = glob.glob(f"{output_dir}/**/*{wer_summary_filename}")
     for file in summary_files:
@@ -106,7 +106,7 @@ def main():
 
     config = Config(config_file)
 
-    output_dir = os.path.dirname(config.getValue("Output", "summary_file"))
+    output_dir = os.path.dirname(config.getValue("ErrorRateOutput", "summary_file"))
     if output_dir is None or len(output_dir) == 0:
         output_dir = "."
     #print(output_dir)
