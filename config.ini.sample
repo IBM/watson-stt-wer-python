@@ -11,6 +11,7 @@ inactivity_timeout=-1
 speech_detector_sensitivity=0.5
 background_audio_suppression=0.0
 smart_formatting=False
+;customization_weight=0.3
 
 #At most one of interim_results and audio_metrics can be True
 interim_results=False
@@ -18,16 +19,19 @@ audio_metrics=False
 
 [Transcriptions]
 reference_transcriptions_file=reference_transcriptions.csv
-stt_transcriptions_file=stt_transcriptions.csv
+stt_transcriptions_file=output/stt_transcriptions.csv
 audio_file_folder=.
 
 [ErrorRateOutput]
+;Suggestion: Use same folders for both [ErrorRateOutput] and [Transcriptions] sections
 ;Columnar file with audio file name, transcriptions, error details
-details_file=wer_details.csv
+details_file=output/wer_details.csv
 ;JSON file with number of samples, total WER, total SER
-summary_file=wer_summary.json
+summary_file=output/wer_summary.json
 ;Columnar file with word, total frequency, error count, error rather
-word_accuracy_file=wer_word_accuracy.csv
+word_accuracy_file=output/wer_word_accuracy.csv
+;JSON file with STT output
+stt_transcriptions_file=output/stt_transcriptions.csv
 
 [Transformations]
 remove_word_list=uh,uhuh,%hesitation,hesitation

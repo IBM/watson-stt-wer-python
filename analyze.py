@@ -7,10 +7,12 @@
 # It computes the minimum-edit distance between the ground-truth sentence and the hypothesis sentence of a speech-to-text API.
 # The minimum-edit distance is calculated using the python C module python-Levenshtein.
 
+import os
 import jiwer
 import json
 import sys
 import csv
+from shutil import copyfile
 from os.path import join, dirname
 from config import Config
 import nltk
@@ -69,7 +71,7 @@ class AnalysisResults:
             tuple = self.get_tuple(word)
             tuple['count'] = tuple['count']+1
             tuple['error_rate'] = tuple['errors'] / tuple['count']
-        
+
         for word in result.differences:
             tuple = self.get_tuple(word)
             tuple['errors']     = tuple['errors']+1
@@ -232,6 +234,10 @@ def main():
 
     config      = Config(config_file)
     analyzer    = Analyzer(config)
+
+    output_dir = os.path.dirname(config.getValue("ErrorRateOutput", "summary_file"))
+    if output_dir is not None and len(output_dir) > 0:
+        os.makedirs(output_dir, exist_ok=True)
 
     results = analyzer.analyze()
     results.write_details(config.getValue("ErrorRateOutput","details_file"))
