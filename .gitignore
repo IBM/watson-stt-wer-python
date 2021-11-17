@@ -12,3 +12,4 @@ audio_input*
 __pycache__
 .DS_Store
 experiments_*
+output*
