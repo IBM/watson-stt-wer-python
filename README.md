@@ -79,8 +79,8 @@ Your config file must have references for the `reference_transcriptions_file` an
 python analyze.py config.ini
 ```
 
-## Execution - Experiment
-Use the experiment.py script to execute a series of experiments where configuration settings may change for each experiment.  This option will require customization to set up for the specific configuration to be tested.  Changes should be made in the run_all_experiments function.
+## Experiment
+Use the experiment.py script to execute a series of Transcription/Analyze experiments where configuration settings may change for each experiment.  This option will require customization to set up for the specific configuration to be tested.  Changes should be made in the run_all_experiments function.
 
 ```
 python experiment.py config.ini
