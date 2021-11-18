@@ -79,6 +79,13 @@ Your config file must have references for the `reference_transcriptions_file` an
 python analyze.py config.ini
 ```
 
+## Experiment
+Use the experiment.py script to execute a series of Transcription/Analyze experiments where configuration settings may change for each experiment.  This option will require customization to set up for the specific configuration to be tested.  Changes should be made in the run_all_experiments function.
+
+```
+python experiment.py config.ini
+```
+
 ## Results
 The script creates two output files, in the file names specified by the `details_file` and `summary_file` properties.
 * **Details** (`details_file`) is a CSV file with rows for each audio sample, including reference and hypothesis transcription and specific transcription errors
@@ -88,13 +95,6 @@ The script creates two output files, in the file names specified by the `details
 - WER (word error rate), commonly used in ASR assessment, measures the cost of restoring the output word sequence to the original input sequence.
 - MER (match error rate) is the proportion of I/O word matches which are errors.
 - WIL (word information lost) is a simple approximation to the proportion of word information lost which overcomes the problems associated with the RIL (relative information lost) measure that was proposed half a century ago.
-
-## Execution - Sample Experiment Execution
-Use the experiment.py script to execute a series of experiments where configuration settings may change for each experiment.  This option will require customization to set up for the specific configuration to be tested.  Changes should be made in the run_all_experiments function.
-
-```
-python experiment.py config.ini
-```
 
 ## Background on supporting library
 Repo of the Python module JIWER: https://pypi.org/project/jiwer/
