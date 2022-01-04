@@ -15,6 +15,21 @@ All of the watson-stt-wer-python dependencies are installed at once with `pip`:
 pip install -r requirements.txt
 ```
 
+**Note:**  If receiving an SSL Certificate error (CERTIFICATE_VERIFY_FAILED) when running the python scripts, try the following commands to tell python to use the system certificate store.
+
+**_Windows_**
+```
+pip install --trusted-host pypi.org --trustedhost files.python.org python-certifi-win32
+```
+
+**_MacOS_**
+
+Open a terminal Windows and change to the location of your python installation
+```
+cd /Applications/Python 3.6
+./Install Certificates.command
+```
+
 ## Setup
 Create a copy of `config.ini.sample`. You'll modify this file in subsequent steps.
 ```
