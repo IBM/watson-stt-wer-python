@@ -24,7 +24,7 @@ pip install --trusted-host pypi.org --trustedhost files.python.org python-certif
 
 **_MacOS_**
 
-Open a terminal Windows and change to the location of your python installation
+Open a terminal and change to the location of your python installation to execute `Install Certificates.command`, for example:
 ```
 cd /Applications/Python 3.6
 ./Install Certificates.command
