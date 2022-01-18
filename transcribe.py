@@ -111,6 +111,7 @@ class Transcriber:
         interim_results              = self.config.getBoolean("SpeechToText", "interim_results")
         audio_metrics                = self.config.getBoolean("SpeechToText", "audio_metrics")
         smart_formatting             = self.config.getBoolean("SpeechToText", "smart_formatting")
+        low_latency                  = self.config.getBoolean("SpeechToText", "low_latency")
 
         callback = MyRecognizeCallback(filename, self.transcriptions)
 
@@ -128,6 +129,7 @@ class Transcriber:
                 speech_detector_sensitivity=speech_detector_sensitivity,
                 background_audio_suppression=background_audio_suppression,
                 smart_formatting=smart_formatting,
+                low_latency=low_latency,
                 customization_weight=customization_weight,
                 #At most one of interim_results and audio_metrics can be True
                 interim_results=interim_results,
