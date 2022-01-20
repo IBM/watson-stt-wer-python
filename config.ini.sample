@@ -11,6 +11,7 @@ inactivity_timeout=-1
 speech_detector_sensitivity=0.5
 background_audio_suppression=0.0
 smart_formatting=False
+low_latency=False
 ;customization_weight=0.3
 
 #At most one of interim_results and audio_metrics can be True
