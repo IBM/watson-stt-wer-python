@@ -134,7 +134,7 @@ For general help, execute:
 python models.py
 ```
 
-The script requires a type (one of base_model,custom_model,corpus,word,grammar) and an operation (one of list,get,create,update,delete,train)
+The script requires a type (one of base_model,custom_model,corpus,word,grammar) and an operation (one of list,get,create,update,delete)
 The script optionally takes a config file as an argument with `-c config_file_name_goes_here`, otherwise using a default file of `config.ini` which contains the connection details for your speech to text instance.
 Depending on the specified operation, the script also accepts a name, description, and file for an associated resource.  For instance, new custom models should have a name and description, and a corpus should have a name and associated file.
 
@@ -167,7 +167,7 @@ python models.py -c config.ini.model1 -o list -t corpus
 
 Train a custom model (the custom model's customization_id is stored in `config.ini.model1`):
 ```
-python models.py -c config.ini.model1 -o train -t custom_model
+python models.py -c config.ini.model1 -o update -t custom_model
 ```
 
 Note some parameter combinations are not possible.  The operations supported all wrap the SDK methods documented at https://cloud.ibm.com/apidocs/speech-to-text.
