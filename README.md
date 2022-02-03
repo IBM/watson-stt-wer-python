@@ -94,7 +94,7 @@ Your config file must have references for the `reference_transcriptions_file` an
 python analyze.py config.ini
 ```
 
-## Experiment
+# Experiment
 Use the experiment.py script to execute a series of Transcription/Analyze experiments where configuration settings may change for each experiment.  This option will require customization to set up for the specific configuration to be tested.  Changes should be made in the run_all_experiments function.
 
 ```
@@ -116,3 +116,58 @@ Repo of the Python module JIWER: https://pypi.org/project/jiwer/
 
 It computes the minimum-edit distance between the ground-truth sentence and the hypothesis sentence of a speech-to-text API.
 The minimum-edit distance is calculated using the python C module python-Levenshtein.
+
+# Model training
+The `models.py` script has wrappers for many model-related tasks including creating models, updating training contents, getting model details, and training models.
+
+## Setup
+Update the parameters in your `config.ini` file.
+
+Required configuration parameters:
+* apikey - API key for your Speech to Text instance
+* service_url - Reference URL for your Speech to Text instance
+* base_model_name - Base model for Speech to Text transcription
+
+## Execution
+For general help, execute:
+```
+python models.py
+```
+
+The script requires a type (one of base_model,custom_model,corpus,word,grammar) and an operation (one of list,get,create,update,delete)
+The script optionally takes a config file as an argument with `-c config_file_name_goes_here`, otherwise using a default file of `config.ini` which contains the connection details for your speech to text instance.
+Depending on the specified operation, the script also accepts a name, description, and file for an associated resource.  For instance, new custom models should have a name and description, and a corpus should have a name and associated file.
+
+## Examples
+
+List all base models:
+```
+python models.py -o list -t base_model
+```
+
+List all custom models:
+```
+python models.py -o list -t custom_model
+```
+
+Create a custom model:
+```
+python models.py -o add -t custom_model -n "model1" -d "my first model"
+```
+
+Add a corpus file for a custom model (the custom model's customization_id is stored in `config.ini.model1`)(`corpus1.txt` contains the corpus contents):
+```
+python models.py -c config.ini.model1 -o add -n "corpus1" -f "corpus1.txt"
+```
+
+List all corpora for a custom model (the custom model's customization_id is stored in `config.ini.model1`):
+```
+python models.py -c config.ini.model1 -o list -t corpus
+```
+
+Train a custom model (the custom model's customization_id is stored in `config.ini.model1`):
+```
+python models.py -c config.ini.model1 -o update -t custom_model
+```
+
+Note some parameter combinations are not possible.  The operations supported all wrap the SDK methods documented at https://cloud.ibm.com/apidocs/speech-to-text.
