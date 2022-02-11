@@ -152,13 +152,14 @@ class Analyzer:
         if self.config.getBoolean("Transformations", "lower_case"):
             pipeline.append(jiwer.ToLowerCase())
 
-        if self.config.getBoolean("Transformations", "remove_multiple_spaces"):
-            pipeline.append(jiwer.RemoveMultipleSpaces())
-
         if self.config.getBoolean("Transformations", "remove_white_space"):
             pipeline.append(jiwer.RemoveWhiteSpace(replace_by_space=True))
 
-        if self.config.getBoolean("Transformations", "sentences_to_words"):
+        if self.config.getBoolean("Transformations", "remove_multiple_spaces"):
+            pipeline.append(jiwer.RemoveMultipleSpaces())
+
+        #JIWER 2.2 defines SentencesToListOfWords
+        if self.config.getBoolean("Transformations", "sentences_to_words") and getattr(jiwer, "SentencesToListOfWords", None) is not None:
             pipeline.append(jiwer.SentencesToListOfWords(word_delimiter=" "))
 
         word_list = self.config.getValue("Transformations", "remove_word_list")
@@ -173,6 +174,11 @@ class Analyzer:
 
         if self.config.getBoolean("Transformations", "remove_empty_strings"):
             pipeline.append(jiwer.RemoveEmptyStrings())
+
+        #JIWER 2.3+ defines ReduceToListOfListOfWords, breaking API change from SentencesToListOfWords
+        if self.config.getBoolean("Transformations", "sentences_to_words") and getattr(jiwer, "ReduceToListOfListOfWords", None) is not None:
+            pipeline.append(jiwer.ReduceToSingleSentence())
+            pipeline.append(jiwer.ReduceToListOfListOfWords(word_delimiter=" "))
 
         return jiwer.Compose(pipeline)
 
