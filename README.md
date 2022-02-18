@@ -152,12 +152,12 @@ python models.py -o list -t custom_model
 
 Create a custom model:
 ```
-python models.py -o add -t custom_model -n "model1" -d "my first model"
+python models.py -o create -t custom_model -n "model1" -d "my first model"
 ```
 
 Add a corpus file for a custom model (the custom model's customization_id is stored in `config.ini.model1`)(`corpus1.txt` contains the corpus contents):
 ```
-python models.py -c config.ini.model1 -o add -n "corpus1" -f "corpus1.txt"
+python models.py -c config.ini.model1 -o create -n "corpus1" -f "corpus1.txt" -t corpus
 ```
 
 List all corpora for a custom model (the custom model's customization_id is stored in `config.ini.model1`):
