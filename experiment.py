@@ -15,7 +15,7 @@ import pandas as pd
 def run_experiment(config_file, output_dir, stt_param_name, stt_config_val):
 
         if type(stt_config_val) == float:
-            exp_setting = float("{:.1f}".format(stt_config_val))
+            exp_setting = float("{:.2f}".format(stt_config_val))
         else:
             exp_setting = stt_config_val
 
