@@ -1,5 +1,5 @@
 ibm_watson>=4.7.1
-jiwer>=2.2.0
+jiwer==2.2.0
 configparser>=5.0.0
 pandas>=1.0.5
 nltk>=3.4.5
