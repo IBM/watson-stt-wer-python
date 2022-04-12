@@ -62,6 +62,8 @@ class Transcriber:
         self.audio_types["mp3"]  = "audio/mp3"
         self.audio_types["mpeg"] = "audio/mpeg"
         self.audio_types["ogg"]  = "audio/ogg"
+        self.audio_types["webm"]  = "audio/webm"
+        self.audio_types["opus"]  = "audio/webm"
 
     def createSTT(self):
         apikey            = self.config.getValue("SpeechToText", "apikey")
