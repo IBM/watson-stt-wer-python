@@ -173,6 +173,7 @@ python models.py -c config.ini.model1 -o update -t custom_model
 Note some parameter combinations are not possible.  The operations supported all wrap the SDK methods documented at https://cloud.ibm.com/apidocs/speech-to-text.
 
 # Sample setup for organizing multiple experiments
+Instructions for creating a directory structure for organizing input and output files for experiments for multiple models. Creating a new directory structure is recommend for each new model being experimented/tested. A sample `MemberID` model is shown.
 1. Start from root of WER tool directory, `cd WATSON-STT-WER-PYTHON`
 1. Create project directory, `mkdir -p <project name>` 
     1. e.g. `mkdir -p ClientName-data`
@@ -183,7 +184,7 @@ Note some parameter combinations are not possible.  The operations supported all
 1. Create referemce transcriptions directory, `mkdir -p <project name>/reference_transcriptions`
     1. e.g. `mkdir -p ClientName-data/reference_transcriptions`
     1. copy/upload transcription file to directory
-        1. e.g. `cp/temp/transcriptions/reference_transcription_memberID_rand10.csv ClientName-data/reference_transcriptions` 
+        1. e.g. `cp/temp/transcriptions/reference_transcription_memberID.csv ClientName-data/reference_transcriptions` 
 1. Create experiments directory, `mkdir -p <project name>/experiments/<model description base>/<model detail>`
     1. e.g. `mkdir -p ClientName-data/experiments/telephony_base/MemberID/`
 1. Copy sample config file over to directory
@@ -195,7 +196,7 @@ Note some parameter combinations are not possible.  The operations supported all
         .
         .
         [Transcriptions]
-        reference_transcriptions_file=./ClientName-data/reference_transcriptions/reference_transcription_memberID_rand10.csv
+        reference_transcriptions_file=./ClientName-data/reference_transcriptions/reference_transcription_memberID.csv
         stt_transcriptions_file=./ClientName-data/experiments/telephony_base/MemberID/stt_transcription.csv
         audio_file_folder=./ClientName-data/audios/audio.memberID
 
