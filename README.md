@@ -171,3 +171,41 @@ python models.py -c config.ini.model1 -o update -t custom_model
 ```
 
 Note some parameter combinations are not possible.  The operations supported all wrap the SDK methods documented at https://cloud.ibm.com/apidocs/speech-to-text.
+
+# Sample setup for organizing multiple experiments
+Instructions for creating a directory structure for organizing input and output files for experiments for multiple models. Creating a new directory structure is recommend for each new model being experimented/tested. A sample `MemberID` model is shown.
+1. Start from root of WER tool directory, `cd WATSON-STT-WER-PYTHON`
+1. Create project directory, `mkdir -p <project name>` 
+    1. e.g. `mkdir -p ClientName-data`
+1. Create audio directory, `mkdir -p <project name>/audios/<audio type>`
+    1. e.g. `mkdir -p ClientName-data/audios/audio.memberID`
+    1. copy/upload audio files to directory
+        1. e.g. `cp /temp/audio/*.wav ClientName-data/audios/audio.memberID`
+1. Create referemce transcriptions directory, `mkdir -p <project name>/reference_transcriptions`
+    1. e.g. `mkdir -p ClientName-data/reference_transcriptions`
+    1. copy/upload transcription file to directory
+        1. e.g. `cp/temp/transcriptions/reference_transcription_memberID.csv ClientName-data/reference_transcriptions` 
+1. Create experiments directory, `mkdir -p <project name>/experiments/<model description base>/<model detail>`
+    1. e.g. `mkdir -p ClientName-data/experiments/telephony_base/MemberID/`
+1. Copy sample config file over to directory
+    1. e.g. `cp config.ini.sample ClientName-data/experiments/telephony_base/MemberID/config.ini`
+    1. Edit the config file to match your new directory structure
+        ```
+        base_model_name=en-US_Telephony
+        .
+        .
+        .
+        [Transcriptions]
+        reference_transcriptions_file=./ClientName-data/reference_transcriptions/reference_transcription_memberID.csv
+        stt_transcriptions_file=./ClientName-data/experiments/telephony_base/MemberID/stt_transcription.csv
+        audio_file_folder=./ClientName-data/audios/audio.memberID
+
+        [ErrorRateOutput]
+        details_file=./ClientName-data/experiments/telephony_base/MemberID/wer_detailsMemberID.csv
+        summary_file=./ClientName-data/experiments/telephony_base/MemberID/wer_summaryMemberID.json
+        word_accuracy_file=./ClientName-data/experiments/telephony_base/MemberID/wer_word_accuracyMemberID.csv
+        stt_transcriptions_file=./ClientName-data/experiments/telephony_base/MemberID/stt_transcription.csv
+        ```
+1. transcribe using the new config file, `python transcribe.py ClientName-data/experiments/telephony_base/MemberID/config.ini`
+1. analyze using the new config file, `python analyze.py ClientName-data/experiments/telephony_base/MemberID/config.ini`
+1. repeat previous steps for each new experiment
