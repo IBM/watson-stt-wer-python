@@ -3,8 +3,15 @@ Utilities for
 * [Transcribing](#transcription) a set of audio files with Speech to Text (STT)
 * [Analyzing](#analysis) the error rate of the STT transcription against a known-good transcription
 
-## Medium article
-Check out this Medium article to learn more how to use it, including a YouTube video demonstration https://medium.com/@marconoel/new-python-scripts-to-measure-word-error-rate-on-watson-speech-to-text-77ecaa513f60
+## More documentation
+This readme describes the tools in depth.  For more information on use cases and methodology, please see the following articles:
+* [New Python Scripts to Measure Word Error Rate on Watson Speech to Text](https://medium.com/@marconoel/new-python-scripts-to-measure-word-error-rate-on-watson-speech-to-text-77ecaa513f60): How to use these tools, including a YouTube video demonstration 
+* [New Speech Testing Utilities for Conversational AI Projects](https://medium.com/ibm-watson-speech-services/new-speech-testing-utilities-for-conversational-ai-projects-bf73debe19be): Describes recipe for using Text to Speech to "bootstrap" testing data
+* [Data Collection and Training for Speech Projects](https://medium.com/ibm-data-ai/data-collection-and-training-for-speech-projects-22004c3e84fb): How to collect test data from human voices.
+* [How to Train your Speech to Text Dragon](https://medium.com/ibm-watson/watson-speech-to-text-how-to-train-your-own-speech-dragon-part-1-data-collection-and-fdd8cea4f4b8)
+
+You may also find useful:
+* [TTS-Python](https://github.com/IBM/watson-tts-python) - companion tooling for IBM Text to Speech
 
 ## Installation
 Requires Python 3.x installation.
