@@ -1,4 +1,4 @@
-ibm_watson>=4.7.1
+ibm_watson>=6.1
 jiwer==2.2.0
 configparser>=5.0.0
 pandas>=1.0.5
