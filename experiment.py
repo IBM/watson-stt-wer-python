@@ -63,17 +63,29 @@ def run_all_experiments(config_file, output_dir):
     #that need to be tested
 
     #Set variable for stt configuration to iterate through
-    sensitivity = 0.3
+#    customization_weight = 0.1
+    character_insertion_bias = 0.0
+#    background_audio_suppression = 0.0
+#    speech_detector_sensitivity = 0.0
 
     #Iterate through possible values of the setting.
-    while sensitivity < 0.5:
+#    while customization_weight < 1.0:
+    while character_insertion_bias < 1.0:
+#    while background_audio_suppression < 1.0:
+#    while speech_detector_sensitivity < 1.0:
 
         #Run the experiment for the specific configuration value
         #You must include the exact name of the stt parameter being tested
-        run_experiment(config_file, output_dir, "speech_detector_sensitivity", sensitivity)
+#        run_experiment(config_file, output_dir, "customization_weight", customization_weight)
+        run_experiment(config_file, output_dir, "character_insertion_bias", character_insertion_bias)
+#        run_experiment(config_file, output_dir, "background_audio_suppression", background_audio_suppression)
+#        run_experiment(config_file, output_dir, "speech_detector_sensitivity", speech_detector_sensitivity)
 
         #Move to the next value to be tested
-        sensitivity = sensitivity + 0.1
+#        customization_weight = customization_weight + 0.1
+        character_insertion_bias = character_insertion_bias + 0.05
+#        background_audio_suppression = background_audio_suppression + 0.05
+#        speech_detector_sensitivity = speech_detector_sensitivity + 0.05
 
 
 def run_report(output_dir, config):
