@@ -104,7 +104,7 @@ class Transcriber:
         inactivity_timeout           =   int(self.config.getValue("SpeechToText", "inactivity_timeout"))
         speech_detector_sensitivity  = float(self.config.getValue("SpeechToText", "speech_detector_sensitivity"))
         background_audio_suppression = float(self.config.getValue("SpeechToText", "background_audio_suppression"))
-        character_insertion_bias     = float(self.config.getValue("SpeechToText", "character_insertion_bias"))
+        character_insertion_bias     = float(self.config.getValue("SpeechToText", "character_insertion_bias", 0.0))
         if language_customization_id is not None:
             customization_weight         = float(self.config.getValue("SpeechToText", "customization_weight"))
         else:
