@@ -13,14 +13,14 @@ class Config:
         self.config = configparser.ConfigParser(interpolation=None)
         self.config.read(config_file)
 
-    def getBoolean(self, section, key):
-        return self.getValue(section, key) == "True"
+    def getBoolean(self, section, key, default_value=None):
+        return self.getValue(section, key, default_value) == "True"
 
-    def getValue(self, section, key):
+    def getValue(self, section, key, default_value=None):
         value = None
         if section in self.config:
            list = self.config[section]
-           value = list.get(key, None)
+           value = list.get(key, default_value)
         return value
 
     def getKeys(self, section):

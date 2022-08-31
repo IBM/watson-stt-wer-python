@@ -104,6 +104,7 @@ class Transcriber:
         inactivity_timeout           =   int(self.config.getValue("SpeechToText", "inactivity_timeout"))
         speech_detector_sensitivity  = float(self.config.getValue("SpeechToText", "speech_detector_sensitivity"))
         background_audio_suppression = float(self.config.getValue("SpeechToText", "background_audio_suppression"))
+        character_insertion_bias     = float(self.config.getValue("SpeechToText", "character_insertion_bias", 0.0))
         if language_customization_id is not None:
             customization_weight         = float(self.config.getValue("SpeechToText", "customization_weight"))
         else:
@@ -114,6 +115,7 @@ class Transcriber:
         audio_metrics                = self.config.getBoolean("SpeechToText", "audio_metrics")
         smart_formatting             = self.config.getBoolean("SpeechToText", "smart_formatting")
         low_latency                  = self.config.getBoolean("SpeechToText", "low_latency")
+        skip_zero_len_words          = self.config.getBoolean("SpeechToText", "skip_zero_len_words")
 
         callback = MyRecognizeCallback(filename, self.transcriptions)
 
@@ -132,6 +134,8 @@ class Transcriber:
                 background_audio_suppression=background_audio_suppression,
                 smart_formatting=smart_formatting,
                 low_latency=low_latency,
+                skip_zero_len_words=skip_zero_len_words,
+                character_insertion_bias=character_insertion_bias,
                 customization_weight=customization_weight,
                 #At most one of interim_results and audio_metrics can be True
                 interim_results=interim_results,
