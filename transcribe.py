@@ -1,3 +1,4 @@
+from datetime import datetime
 import json
 import os
 import sys
@@ -15,6 +16,8 @@ import os.path
 from os import path
 
 import pandas as pd
+
+from uuid import uuid4
 
 class Transcriptions:
     data = {}
@@ -118,6 +121,12 @@ class Transcriber:
         skip_zero_len_words          = self.config.getBoolean("SpeechToText", "skip_zero_len_words")
 
         callback = MyRecognizeCallback(filename, self.transcriptions)
+
+        transaction_id=str("{}".format(datetime.now().strftime('%Y%m-%d%H-%M%S-') + str(uuid4())))
+        new_headers=self.STT.default_headers
+        new_headers['X-Global-Transaction-Id']=transaction_id
+        self.STT.set_default_headers(new_headers)
+        print("--> Transaction ID:", self.STT.default_headers['X-Global-Transaction-Id'])
 
         #print(f"Requesting transcription of {filename}")
         with open(filename, "rb") as audio_file:
