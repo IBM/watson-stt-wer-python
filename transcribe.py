@@ -119,14 +119,16 @@ class Transcriber:
         smart_formatting             = self.config.getBoolean("SpeechToText", "smart_formatting")
         low_latency                  = self.config.getBoolean("SpeechToText", "low_latency")
         skip_zero_len_words          = self.config.getBoolean("SpeechToText", "skip_zero_len_words")
+        custom_transaction_id        = self.config.getBoolean("SpeechToText", "custom_transaction_id")
 
         callback = MyRecognizeCallback(filename, self.transcriptions)
 
-        transaction_id=str("{}".format(datetime.now().strftime('%Y%m-%d%H-%M%S-') + str(uuid4())))
-        new_headers=self.STT.default_headers
-        new_headers['X-Global-Transaction-Id']=transaction_id
-        self.STT.set_default_headers(new_headers)
-        print("--> Transaction ID:", self.STT.default_headers['X-Global-Transaction-Id'])
+        if custom_transaction_id:
+            transaction_id=str("{}".format(datetime.now().strftime('%Y%m-%d%H-%M%S-') + str(uuid4())))
+            new_headers=self.STT.default_headers
+            new_headers['X-Global-Transaction-Id']=transaction_id
+            self.STT.set_default_headers(new_headers)
+            print("--> Transaction ID:", self.STT.default_headers['X-Global-Transaction-Id'])
 
         #print(f"Requesting transcription of {filename}")
         with open(filename, "rb") as audio_file:
