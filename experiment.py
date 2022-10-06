@@ -51,11 +51,11 @@ def run_experiment(config_file, output_dir, stt_param_name, stt_config_val):
 
         exp_config.writeFile(exp_config_path)
 
-        #Get Transcriptions
-        subprocess.call(["python", "transcribe.py", exp_config_path])
+        #Get Transcriptions 
+        transcribe.run(exp_config_path)
 
         #Get Analysis
-        subprocess.call(["python", "analyze.py", exp_config_path])
+        analyze.run(exp_config_path)
 
 def run_all_experiments(config_file, output_dir):
 
