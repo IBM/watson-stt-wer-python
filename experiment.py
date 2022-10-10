@@ -12,6 +12,9 @@ import glob
 
 import pandas as pd
 
+import transcribe
+import analyze
+
 def run_experiment(config_file, output_dir, stt_param_name, stt_config_val):
 
         if type(stt_config_val) == float:
