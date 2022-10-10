@@ -238,6 +238,9 @@ def main():
     else:
        print("Using default config filename: config.ini.")
 
+    run(config_file)
+
+def run(config_file:str):
     config      = Config(config_file)
     analyzer    = Analyzer(config)
 

@@ -185,14 +185,17 @@ class Transcriber:
                         print(f"Updated {report_file_name} with reference transcriptions")
             except Exception as e:
                 print(f"Warning - Failed to merge reference transcriptions into {report_file_name}:",e)
+                
 def main():
-
     config_file = "config.ini"
     if len(sys.argv) > 1:
        config_file = sys.argv[1]
     else:
        print("Using default config filename: config.ini.")
 
+    run(config_file)
+
+def run(config_file:str):
     config      = Config(config_file)
     transcriber = Transcriber(config)
 
@@ -206,7 +209,6 @@ def main():
     for file in sorted(files):
         if transcriber.getAudioType(file) is not None:
             transcriber.transcribe(audio_file_dir + "/" + file)
-
 
     transcriber.report()
 
