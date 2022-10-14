@@ -1,8 +1,10 @@
 import json
 import os
+from pickle import TRUE
 import sys
 import re
 import csv
+import time
 from config import Config
 
 from ibm_watson import SpeechToTextV1
@@ -71,7 +73,7 @@ class ModelTool:
                 if response is not None:
                     #Could do global handling of HTTP status code, etc
                     #eprint(response.get_status_code())
-                    print(response.get_result())
+                    print(json.dumps(response.get_result(), indent=2))
                 else:
                     eprint(f"Error executing operation: {self.ARGS.operation} on type: {self.ARGS.type}")    
             else:
@@ -82,6 +84,24 @@ class ModelTool:
     # Most methods rely on the customization ID, we can abstract the config file from those methods
     def get_customization_id(self):
         return self.config.getValue("SpeechToText", "language_model_id")
+
+    def wait_until(self, status):
+        """Wait until the model is in the given state, such as 'ready' or 'available'
+        (it might still need to finalize an operation such adding a corpus file or training)
+        """
+        while True:
+            resp = self.STT.get_language_model(self.get_customization_id())
+            # respjson = json.dumps(resp)
+            print("resp result status: ", resp.result['status'])
+            if resp.status_code != 200:
+                return False            
+            if resp.result['status'] == status:
+                break
+            elif resp.result['status'] == 'failed':
+                break
+            else:
+                print("model in '" + resp.result['status'] + "' status, waiting until '" + status + "'...")
+                time.sleep(5.0)
 
     '''
     Base model functions
@@ -178,17 +198,27 @@ class ModelTool:
         return self.do_write_corpus(update=True)
 
     def do_write_corpus(self, update:bool):
-        if self.ARGS.file is None:
-            eprint("ERROR: Must pass a 'file' for the corpus")
+        if self.ARGS.file is None and self.ARGS.directory is None:
+            eprint("ERROR: Must pass a 'file' or 'directory' for the corpus")
             return None
 
-        name = self.ARGS.name
-        if self.ARGS.name is None:
-            name = os.path.basename(self.ARGS.file)
-            eprint(f"WARNING: A corpus 'name' is required. Using default name '{name}'")
+        if self.ARGS.directory is not None:
+            dir = os.path.dirname(os.path.join(self.ARGS.directory, ''))
+            for file in os.listdir(dir):
+                filename = os.path.basename(file).split('.')[0]
+                with open(os.path.join(dir, file), 'rb') as corpus_contents:
+                    resp = self.STT.add_corpus(self.get_customization_id(), filename, corpus_contents, allow_overwrite="true")
+                    self.wait_until('ready')
+                    print("Corpora ", filename, " created")
+            return resp
+        if self.ARGS.file is not None:
+            name = self.ARGS.name
+            if self.ARGS.name is None:
+                name = os.path.basename(self.ARGS.file)
+                eprint(f"WARNING: A corpus 'name' is required. Using default name '{name}'")
 
-        with open(self.ARGS.file, 'rb') as corpus_contents:
-            return self.STT.add_corpus(self.get_customization_id(), name, corpus_contents, allow_overwrite=update)
+            with open(self.ARGS.file, 'rb') as corpus_contents:
+                return self.STT.add_corpus(self.get_customization_id(), name, corpus_contents, allow_overwrite="true")
 
     def get_corpus(self):
         if self.ARGS.name is None:
@@ -242,8 +272,9 @@ class ModelTool:
                                         sounds_like = word_json.get('sounds_like'),
                                         display_as  = word_json.get('display_as')
                                         ))
-
-            return self.STT.add_words(self.get_customization_id(), words)
+            resp = self.STT.add_words(self.get_customization_id(), words)
+            self.wait_until('ready')
+            return resp
 
     def delete_word(self):
         if self.ARGS.name is None:
@@ -318,6 +349,7 @@ def create_parser():
     parser.add_argument('-n', '--name', type=str, required=False, help="name the operation works on, for instance 'MyModel' or 'corpus1'.")
     parser.add_argument('-d', '--description', type=str, required=False, help="description of the object being created; used only in create")
     parser.add_argument('-f', '--file', type=str, required=False, help="path to a file supporting the operation, for instance a corpus file or grammar file")
+    parser.add_argument('-dir', '--directory', type=str, required=False, help="directory containing corpus files")
     return parser
 
 def main(ARGS):
