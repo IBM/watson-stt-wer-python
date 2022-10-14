@@ -2,9 +2,8 @@
 apikey=xxxxxxxxx-xxxxx-xxxxx-xxxxxxxxxxx # pragma: allowlist secret
 service_url=https://....
 use_bearer_token=False
-base_model_name=en-US_NarrowbandModel
+base_model_name=en-US_Telephony
 ;language_model_id=xxxxxxxxx-xxxxx-xxxxx-xxxxxxxxxxx
-;acoustic_model_id=xxxxxxxxx-xxxxx-xxxxx-xxxxxxxxxxx
 ;grammar_name=
 end_of_phrase_silence_time=1.5
 inactivity_timeout=-1
@@ -12,7 +11,8 @@ speech_detector_sensitivity=0.5
 background_audio_suppression=0.0
 smart_formatting=False
 low_latency=False
-;customization_weight=0.3
+;customization_weight=0.1
+;character_insertion_bias=0.1
 
 #At most one of interim_results and audio_metrics can be True
 interim_results=False
