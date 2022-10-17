@@ -166,13 +166,17 @@ class ModelTool:
         return self.STT.delete_language_model(self.get_customization_id())
 
     def train_custom_model(self):
-        return self.STT.train_language_model(self.get_customization_id())
+        resp = self.STT.train_language_model(self.get_customization_id())
+        self.wait_until('available')
+        return resp
 
     def reset_custom_model(self):
         return self.STT.reset_language_model(self.get_customization_id())
 
     def upgrade_custom_model(self):
-        return self.STT.upgrade_language_model(self.get_customization_id())
+        resp = self.STT.upgrade_language_model(self.get_customization_id())
+        self.wait_until('available')
+        return resp
 
     '''
     Corpus functions
