@@ -1,6 +1,5 @@
 import json
 import os
-from pickle import TRUE
 import sys
 import re
 import csv
