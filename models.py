@@ -71,7 +71,7 @@ class ModelTool:
                 if response is not None:
                     #Could do global handling of HTTP status code, etc
                     #eprint(response.get_status_code())
-                    print(response.get_result())
+                    print(json.dumps(response.get_result(), indent=2))
                 else:
                     eprint(f"Error executing operation: {self.ARGS.operation} on type: {self.ARGS.type}")    
             else:
