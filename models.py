@@ -72,7 +72,7 @@ class ModelTool:
                 if response is not None:
                     #Could do global handling of HTTP status code, etc
                     #eprint(response.get_status_code())
-                    print(json.dumps(response.get_result(), indent=2))
+                    eprint(json.dumps(response.get_result(), indent=2))
                 else:
                     eprint(f"Error executing operation: {self.ARGS.operation} on type: {self.ARGS.type}")    
             else:
@@ -97,7 +97,7 @@ class ModelTool:
             elif resp.result['status'] == 'failed':
                 break
             else:
-                print(action + " in progress. Please wait...")
+                eprint(action + " in progress. Please wait...")
                 time.sleep(5.0)
 
     '''
@@ -165,7 +165,7 @@ class ModelTool:
     def train_custom_model(self):
         resp = self.STT.train_language_model(self.get_customization_id())
         self.wait_until('available', "Training")
-        print("Training complete. Custom model is ready to use.")
+        eprint("Training complete. Custom model is ready to use.")
         return resp
 
     def reset_custom_model(self):
@@ -174,7 +174,7 @@ class ModelTool:
     def upgrade_custom_model(self):
         resp = self.STT.upgrade_language_model(self.get_customization_id())
         self.wait_until('available', "Upgrading")
-        print("Upgrade complete.")
+        eprint("Upgrade complete.")
         return resp
 
     '''
@@ -212,7 +212,7 @@ class ModelTool:
                 with open(os.path.join(dir, file), 'rb') as corpus_contents:
                     resp = self.STT.add_corpus(self.get_customization_id(), filename, corpus_contents, allow_overwrite="true")
                     self.wait_until('ready', f"Creating corpora {filename}")
-                    print("Corpora " + filename + " processed")
+                    eprint("Corpora " + filename + " processed")
             return resp
         if self.ARGS.file is not None:
             name = self.ARGS.name
@@ -277,7 +277,7 @@ class ModelTool:
                                         ))
             resp = self.STT.add_words(self.get_customization_id(), words)
             self.wait_until('ready', f"Creating words from {self.ARGS.file}")
-            print("Words in file processed.")
+            eprint("Words in file processed.")
             return resp
 
     def delete_word(self):
