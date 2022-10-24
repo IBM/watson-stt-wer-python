@@ -13,6 +13,8 @@ smart_formatting=False
 low_latency=False
 ;customization_weight=0.1
 ;character_insertion_bias=0.1
+;customization_weight=0.3
+custom_transaction_id=False
 
 #At most one of interim_results and audio_metrics can be True
 interim_results=False
