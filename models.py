@@ -84,14 +84,12 @@ class ModelTool:
     def get_customization_id(self):
         return self.config.getValue("SpeechToText", "language_model_id")
 
-    def wait_until(self, status):
+    def wait_until(self, status, action):
         """Wait until the model is in the given state, such as 'ready' or 'available'
         (it might still need to finalize an operation such adding a corpus file or training)
         """
         while True:
             resp = self.STT.get_language_model(self.get_customization_id())
-            # respjson = json.dumps(resp)
-            print("resp result status: ", resp.result['status'])
             if resp.status_code != 200:
                 return False            
             if resp.result['status'] == status:
@@ -99,7 +97,7 @@ class ModelTool:
             elif resp.result['status'] == 'failed':
                 break
             else:
-                print("model in '" + resp.result['status'] + "' status, waiting until '" + status + "'...")
+                print(action + " in progress. Please wait...")
                 time.sleep(5.0)
 
     '''
@@ -166,7 +164,8 @@ class ModelTool:
 
     def train_custom_model(self):
         resp = self.STT.train_language_model(self.get_customization_id())
-        self.wait_until('available')
+        self.wait_until('available', "Training")
+        print("Training complete. Custom model is ready to use.")
         return resp
 
     def reset_custom_model(self):
@@ -174,7 +173,8 @@ class ModelTool:
 
     def upgrade_custom_model(self):
         resp = self.STT.upgrade_language_model(self.get_customization_id())
-        self.wait_until('available')
+        self.wait_until('available', "Upgrading")
+        print("Upgrade complete.")
         return resp
 
     '''
@@ -211,8 +211,8 @@ class ModelTool:
                 filename = os.path.basename(file).split('.')[0]
                 with open(os.path.join(dir, file), 'rb') as corpus_contents:
                     resp = self.STT.add_corpus(self.get_customization_id(), filename, corpus_contents, allow_overwrite="true")
-                    self.wait_until('ready')
-                    print("Corpora ", filename, " created")
+                    self.wait_until('ready', f"Creating corpora {filename}")
+                    print("Corpora " + filename + " processed")
             return resp
         if self.ARGS.file is not None:
             name = self.ARGS.name
@@ -276,7 +276,8 @@ class ModelTool:
                                         display_as  = word_json.get('display_as')
                                         ))
             resp = self.STT.add_words(self.get_customization_id(), words)
-            self.wait_until('ready')
+            self.wait_until('ready', f"Creating words from {self.ARGS.file}")
+            print("Words in file processed.")
             return resp
 
     def delete_word(self):

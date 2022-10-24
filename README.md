@@ -167,6 +167,11 @@ Add a corpus file for a custom model (the custom model's customization_id is sto
 python models.py -c config.ini.model1 -o create -n "corpus1" -f "corpus1.txt" -t corpus
 ```
 
+Create corpora for all corpus files in a directory (the filename will be used for the corpora name)
+```
+python models.py -c config.ini.model1 -o create -t corpus -dir corpus-dir
+```
+
 List all corpora for a custom model (the custom model's customization_id is stored in `config.ini.model1`):
 ```
 python models.py -c config.ini.model1 -o list -t corpus
