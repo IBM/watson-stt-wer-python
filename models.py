@@ -209,6 +209,10 @@ class ModelTool:
             dir = os.path.dirname(os.path.join(self.ARGS.directory, ''))
             for file in os.listdir(dir):
                 filename = os.path.basename(file).split('.')[0]
+                if filename == "":
+                    eprint(f"ERROR: Corpus name is blank for file: {file}")
+                    return None
+                print("filename: ", filename)
                 with open(os.path.join(dir, file), 'rb') as corpus_contents:
                     resp = self.STT.add_corpus(self.get_customization_id(), filename, corpus_contents, allow_overwrite="true")
                     self.wait_until('ready', f"Creating corpora {filename}")
