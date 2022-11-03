@@ -113,6 +113,7 @@ class ModelTool:
         # Update intentionally mapped to STT 'train' to reduce operation count.  
         # Thus the SDK's 'add' is our 'create' and SDK's 'train' is our update.  This matches my mental model of speech customization.
         handlers['update'] = self.train_custom_model
+        handlers['reset'] = self.reset_custom_model
 
         return handlers
 
@@ -313,7 +314,7 @@ class ModelTool:
 def create_parser():
     parser = ArgumentParser(description='Run IBM Speech To Text model-related commands')
     parser.add_argument('-c', '--config_file', type=str, required=False, default="config.ini", help='Configuration file including connection details')
-    parser.add_argument('-o', '--operation', type=str, required=True, choices=["list","get","create","update","delete"], help="operation to perform")
+    parser.add_argument('-o', '--operation', type=str, required=True, choices=["list","get","create","update","delete","reset"], help="operation to perform")
     parser.add_argument('-t', '--type', type=str, required=True, choices=["base_model","custom_model","corpus","word","grammar"], help="type the operation works on")
     parser.add_argument('-n', '--name', type=str, required=False, help="name the operation works on, for instance 'MyModel' or 'corpus1'.")
     parser.add_argument('-d', '--description', type=str, required=False, help="description of the object being created; used only in create")
