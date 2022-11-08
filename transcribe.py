@@ -223,7 +223,7 @@ def run(config_file:str):
         os.makedirs(output_dir, exist_ok=True)
 
     files = [audio_file_dir + "/" + f for f in os.listdir(audio_file_dir)]
-    with concurrent.futures.ThreadPoolExecutor(max_workers=20) as executor:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=max_threads) as executor:
         executor.map(transcriber.transcribe,files)
 
     transcriber.report()

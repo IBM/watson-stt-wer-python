@@ -2,7 +2,9 @@
 apikey=xxxxxxxxx-xxxxx-xxxxx-xxxxxxxxxxx # pragma: allowlist secret
 service_url=https://....
 use_bearer_token=False
+
 ;max_threads=20
+
 base_model_name=en-US_Telephony
 ;language_model_id=xxxxxxxxx-xxxxx-xxxxx-xxxxxxxxxxx
 ;grammar_name=
