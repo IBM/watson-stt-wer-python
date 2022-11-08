@@ -4,6 +4,8 @@ import os
 import sys
 import re
 import csv
+import concurrent.futures
+import threading
 from config import Config
 
 from ibm_watson import SpeechToTextV1
@@ -211,15 +213,18 @@ def run(config_file:str):
     transcriber = Transcriber(config)
 
     audio_file_dir    = config.getValue("Transcriptions","audio_file_folder")
+    max_threads   = config.getValue("SpeechToText","max_threads")
+    if max_threads is None:
+        max_threads=1
+    print("max_threads: ", max_threads)
 
     output_dir = os.path.dirname(config.getValue("ErrorRateOutput", "summary_file"))
     if output_dir is not None and len(output_dir) > 0:
         os.makedirs(output_dir, exist_ok=True)
 
-    files = [f for f in os.listdir(audio_file_dir)]
-    for file in sorted(files):
-        if transcriber.getAudioType(file) is not None:
-            transcriber.transcribe(audio_file_dir + "/" + file)
+    files = [audio_file_dir + "/" + f for f in os.listdir(audio_file_dir)]
+    with concurrent.futures.ThreadPoolExecutor(max_workers=20) as executor:
+        executor.map(transcriber.transcribe,files)
 
     transcriber.report()
 
