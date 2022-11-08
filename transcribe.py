@@ -153,8 +153,47 @@ class Transcriber:
                 audio_metrics=audio_metrics
             )
             #print(f"Requested transcription of {filename}")
+    def report_ctm(self):
+        report_file_name = self.config.getValue("Transcriptions", "stt_transcriptions_file_ctm")
+        data = self.transcriptions.getData()
 
-    def report(self):
+        entries = []
+        for filename in sorted(data.keys()):            
+            transcript = data[filename]
+            # if the filename contains whitespaces we replace them by '_'  
+            # ctm format described in link below, using 1 0 -1 as default
+            # https://people.csail.mit.edu/joe/sctk-1.2/doc/infmts.htm#ctm_fmt_name_0          
+            for word in transcript.split():
+                entries.append(filename.replace(' ','_') + " 1 0 -1 " + word)
+                #print(filename, "1 0 -1", word)
+        self.write_to_file(entries,report_file_name)
+
+    def report_stm(self):
+        reference_file_name = self.config.getValue("Transcriptions", "reference_transcriptions_file")
+        report_file_name = self.config.getValue("Transcriptions", "stt_transcriptions_file_stm")
+        if reference_file_name is not None:
+            try:
+                if path.exists(reference_file_name):
+                    print(f"Found reference transcriptions file - {reference_file_name} - attempting to create stm file")
+                    ref_df = pd.read_csv(reference_file_name)
+                    ref_df = ref_df.sort_values(by = 'Audio File Name')
+                    ref_df.insert(1,"num1",pd.Series([1 for x in range(len(ref_df.index))]))
+                    ref_df.insert(2,"num2",pd.Series([0 for x in range(len(ref_df.index))]))
+                    ref_df.insert(3,"num3",pd.Series([0 for x in range(len(ref_df.index))]))
+                    ref_df.insert(4,"num4",pd.Series([1000 for x in range(len(ref_df.index))]))
+                    #write out to file
+                    ref_df = ref_df.to_string(header=False,index=False)
+                    lines = ref_df.split("\n")
+                    new_lines = []
+                    for line in lines:
+                        new_lines.append(line.lstrip())
+                    self.write_to_file(new_lines, report_file_name)
+                     
+
+            except Exception as e:
+                print(f"Warning - Failed to merge reference transcriptions into {report_file_name}:",e)
+
+    def report_csv(self):
         report_file_name = self.config.getValue("Transcriptions", "stt_transcriptions_file")
         csv_columns = ['Audio File Name','Transcription']
         #print(self.transcriptions.getData())
@@ -174,7 +213,9 @@ class Transcriber:
                     print(f"Found reference transcriptions file - {reference_file_name} - attempting merge with model's transcriptions")
 
                     file1_df = pd.read_csv(report_file_name)
+                    file1_df = file1_df.sort_values(by = 'Audio File Name')
                     file2_df = pd.read_csv(reference_file_name)
+                    file2_df = file2_df.sort_values(by = 'Audio File Name')
 
                     missing_columns = False
                     if not "Audio File Name" in file2_df.columns:
@@ -196,6 +237,11 @@ class Transcriber:
                         print(f"Updated {report_file_name} with reference transcriptions")
             except Exception as e:
                 print(f"Warning - Failed to merge reference transcriptions into {report_file_name}:",e)
+
+    def write_to_file(self, entries, filename):
+        with open(filename, "wt", encoding="utf-8") as f:
+            for entry in entries:
+                f.write(entry + "\n") 
                 
 def main():
     config_file = "config.ini"
@@ -221,7 +267,9 @@ def run(config_file:str):
         if transcriber.getAudioType(file) is not None:
             transcriber.transcribe(audio_file_dir + "/" + file)
 
-    transcriber.report()
+    transcriber.report_csv()
+    transcriber.report_ctm()
+    transcriber.report_stm()
 
 if __name__ == '__main__':
     main()
