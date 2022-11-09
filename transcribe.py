@@ -157,6 +157,8 @@ class Transcriber:
         report_file_name = self.config.getValue("Transcriptions", "stt_transcriptions_file_ctm")
         data = self.transcriptions.getData()
 
+        print(f"Attempting to create ctm file from transcriptions")
+
         entries = []
         for filename in sorted(data.keys()):            
             transcript = data[filename]
@@ -167,6 +169,7 @@ class Transcriber:
                 entries.append(filename.replace(' ','_') + " 1 0 -1 " + word)
                 #print(filename, "1 0 -1", word)
         self.write_to_file(entries,report_file_name)
+        print(f"Created ctm file - {report_file_name}")
 
     def report_stm(self):
         reference_file_name = self.config.getValue("Transcriptions", "reference_transcriptions_file")
@@ -188,10 +191,10 @@ class Transcriber:
                     for line in lines:
                         new_lines.append(line.lstrip())
                     self.write_to_file(new_lines, report_file_name)
+                    print(f"Created stm file - {report_file_name}")
                      
-
             except Exception as e:
-                print(f"Warning - Failed to merge reference transcriptions into {report_file_name}:",e)
+                print(f"Warning - Failed to create stm file {report_file_name}:",e)
 
     def report_csv(self):
         report_file_name = self.config.getValue("Transcriptions", "stt_transcriptions_file")
