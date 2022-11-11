@@ -59,6 +59,7 @@ Required configuration parameters:
 * base_model_name - Base model for Speech to Text transcription
 
 Optional configuration parameters:
+* max_threads - Maximum number of threads to use with `transcribe.py` to improve performance. 
 * language_model_id - Language model customization ID (comment out to use base model)
 * acoustic_model_id - Acoustic model customization ID (comment out to use base model)
 * grammar_name - Grammar name (comment out to use base model)
