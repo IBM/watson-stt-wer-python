@@ -14,7 +14,8 @@ with open('./reference_transcriptions_whisper.csv','w', encoding='utf-8') as csv
     csvfile.write('\n')
 
     for f in files:
-        if f.endswith(".wav"): #Transcribing WAV files only
+        #Transcribing WAV, MP3 or WEBM audio files only
+        if (f.endswith(".wav")) or (f.endswith(".mp3")) or (f.endswith(".webm")):
             # load audio and pad/trim it to fit 30 seconds
             audio = whisper.load_audio(f)
             audio = whisper.pad_or_trim(audio)
@@ -25,6 +26,8 @@ with open('./reference_transcriptions_whisper.csv','w', encoding='utf-8') as csv
             # detect the spoken language
             _, probs = model.detect_language(mel)
             audio_lang = max(probs, key=probs.get)
+            #if not accurate - hard-code the language
+            audio_lang='es'
 
             #transcribing audio with whisper model
             print(f"Processing audio file {f} using language {audio_lang}")
