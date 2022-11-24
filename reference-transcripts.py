@@ -6,6 +6,7 @@ model = whisper.load_model("medium")
 #list audio files in current folder
 
 files=os.listdir('.')
+auto_detect = True
 
 #Process each audio files in whisper, wirting in reference_transcriptions_whisper.csv
 with open('./reference_transcriptions_whisper.csv','w', encoding='utf-8') as csvfile:
@@ -23,16 +24,17 @@ with open('./reference_transcriptions_whisper.csv','w', encoding='utf-8') as csv
             # make log-Mel spectrogram and move to the same device as the model
             mel = whisper.log_mel_spectrogram(audio).to(model.device)
 
-            # detect the spoken language
-            _, probs = model.detect_language(mel)
-            audio_lang = max(probs, key=probs.get)
-            #if not accurate - hard-code the language
-            audio_lang='es'
+            if auto_detect == True:
+                # detect the spoken language
+                _, probs = model.detect_language(mel)
+                audio_lang = max(probs, key=probs.get)
+            else:
+                audio_lang='<put_default_language_id_here>'
 
             #transcribing audio with whisper model
             print(f"Processing audio file {f} using language {audio_lang}")
             result = model.transcribe(f,fp16=False, language=audio_lang)
 
             #writing into CSV file
-            csvfile.write(str(audio_lang)+','+'./'+str(f)+','+result["text"])
+            csvfile.write(str(audio_lang)+','+'./'+str(f)+','+'"'+result["text"]+'"')
             csvfile.write('\n')

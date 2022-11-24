@@ -5,7 +5,7 @@ Utilities for
 
 ## More documentation
 This readme describes the tools in depth.  For more information on use cases and methodology, please see the following articles:
-* [New Python Scripts to Measure Word Error Rate on Watson Speech to Text](https://medium.com/@marconoel/new-python-scripts-to-measure-word-error-rate-on-watson-speech-to-text-77ecaa513f60): How to use these tools, including a YouTube video demonstration 
+* [New Python Scripts to Measure Word Error Rate on Watson Speech to Text](https://medium.com/@marconoel/new-python-scripts-to-measure-word-error-rate-on-watson-speech-to-text-77ecaa513f60): How to use these tools, including a YouTube video demonstration
 * [New Speech Testing Utilities for Conversational AI Projects](https://medium.com/ibm-watson-speech-services/new-speech-testing-utilities-for-conversational-ai-projects-bf73debe19be): Describes recipe for using Text to Speech to "bootstrap" testing data
 * [Data Collection and Training for Speech Projects](https://medium.com/ibm-data-ai/data-collection-and-training-for-speech-projects-22004c3e84fb): How to collect test data from human voices.
 * [How to Train your Speech to Text Dragon](https://medium.com/ibm-watson/watson-speech-to-text-how-to-train-your-own-speech-dragon-part-1-data-collection-and-fdd8cea4f4b8)
@@ -59,7 +59,7 @@ Required configuration parameters:
 * base_model_name - Base model for Speech to Text transcription
 
 Optional configuration parameters:
-* max_threads - Maximum number of threads to use with `transcribe.py` to improve performance. 
+* max_threads - Maximum number of threads to use with `transcribe.py` to improve performance.
 * language_model_id - Language model customization ID (comment out to use base model)
 * acoustic_model_id - Acoustic model customization ID (comment out to use base model)
 * grammar_name - Grammar name (comment out to use base model)
@@ -188,7 +188,7 @@ Note some parameter combinations are not possible.  The operations supported all
 # Sample setup for organizing multiple experiments
 Instructions for creating a directory structure for organizing input and output files for experiments for multiple models. Creating a new directory structure is recommend for each new model being experimented/tested. A sample `MemberID` model is shown.
 1. Start from root of WER tool directory, `cd WATSON-STT-WER-PYTHON`
-1. Create project directory, `mkdir -p <project name>` 
+1. Create project directory, `mkdir -p <project name>`
     1. e.g. `mkdir -p ClientName-data`
 1. Create audio directory, `mkdir -p <project name>/audios/<audio type>`
     1. e.g. `mkdir -p ClientName-data/audios/audio.memberID`
@@ -197,7 +197,7 @@ Instructions for creating a directory structure for organizing input and output 
 1. Create referemce transcriptions directory, `mkdir -p <project name>/reference_transcriptions`
     1. e.g. `mkdir -p ClientName-data/reference_transcriptions`
     1. copy/upload transcription file to directory
-        1. e.g. `cp/temp/transcriptions/reference_transcription_memberID.csv ClientName-data/reference_transcriptions` 
+        1. e.g. `cp/temp/transcriptions/reference_transcription_memberID.csv ClientName-data/reference_transcriptions`
 1. Create experiments directory, `mkdir -p <project name>/experiments/<model description base>/<model detail>`
     1. e.g. `mkdir -p ClientName-data/experiments/telephony_base/MemberID/`
 1. Copy sample config file over to directory
@@ -222,3 +222,43 @@ Instructions for creating a directory structure for organizing input and output 
 1. transcribe using the new config file, `python transcribe.py ClientName-data/experiments/telephony_base/MemberID/config.ini`
 1. analyze using the new config file, `python analyze.py ClientName-data/experiments/telephony_base/MemberID/config.ini`
 1. repeat previous steps for each new experiment
+
+# OPTIONAL: New python script `reference-transcripts.py` to create a reference file using the `Whisper` model
+Whisper is a general-purpose speech recognition model. It is trained on a large dataset of diverse audio and is also a multi-task model that can perform multilingual speech recognition as well as speech translation and language identification. - see here for more information https://openai.com/blog/whisper/
+
+Some customers may have a lot of audio files to build their training and test sets, but they do not have time to transcribe them to have a reference.
+This new Python module will allow users to build a pretty accurate reference using the "whisper" model.
+
+NOTE: These models significantly larger that the Watson STT and much slower to process audio files - Be patient.
+
+## Install Whisper models
+- Pull the repository locally: https://github.com/openai/whisper
+- Follow the steps to complete the installation: https://github.com/openai/whisper#setup
+
+## Setup
+- Copy the audio files you wish to get transcribed into the "whisper" root folder
+- Copy the new python script `reference-transcripts.py` into the "whisper" root folder
+
+## Setup the whisper model language for the audio files
+There are 2 ways to select the whisper model language to be used to transcribe your audio files.
+- language detection
+- default language
+
+You need to update the python script `reference-transcripts.py`, and update the "auto_detect" variable
+
+- auto_detect = True
+- auto_detect = False ===> you will need to set a default language for all your files by setting the variable audio_lang=<language_id>
+
+TIP: You can use the same first 2 letters of the Watson STT model you wish to evaluate (eg. en-GB_Telephony ==> "en" / pt-BR_Telephony ==> "pt")
+
+NOTE: The "whisper" language detection may not be accurate. In the CSV file, a column called "Language - CAN BE DELETED" is created as an informational indicator of the "whisper" language used (detected or by default).
+
+## Run the python script `reference-transcripts.py`
+- Go to the "whisper" folder
+- Simply run `python reference-transcripts.py`
+
+When completed, you should be getting a CSV file named `reference_transcriptions_whisper.csv`.
+
+NOTE: Please review and adjust transcription where applicable as this is still speech recognition and may not be accurate. Don't forget to delete the column "Language - CAN BE DELETED" before saving.
+
+You are now ready to use this CSV file as your reference file when evaluating Watson STT.
