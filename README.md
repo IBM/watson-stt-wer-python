@@ -223,21 +223,21 @@ Instructions for creating a directory structure for organizing input and output 
 1. analyze using the new config file, `python analyze.py ClientName-data/experiments/telephony_base/MemberID/config.ini`
 1. repeat previous steps for each new experiment
 
-# OPTIONAL: New python script `reference-transcripts.py` to create a reference file using the `Whisper` model
-Whisper is a general-purpose speech recognition model. It is trained on a large dataset of diverse audio and is also a multi-task model that can perform multilingual speech recognition as well as speech translation and language identification. - see here for more information https://openai.com/blog/whisper/
+# (Optional): Using the `Whisper` model to create a reference file
+Whisper is a general-purpose speech recognition model. It is trained on a large dataset of 680,000 hours containing diverse audio and is also a multi-task model that can perform multilingual speech recognition as well as speech translation and language identification. - see here for more information https://openai.com/blog/whisper/
 
-Some customers may have a lot of audio files to build their training and test sets, but they do not have time to transcribe them to have a reference.
-This new Python module will allow users to build a pretty accurate reference using the "whisper" model.
+Some customers may have a lot of audio files to build their training and test sets, but they do not have time to transcribe them to have a reference. You can always bootstrap your human transcription by using Watson STT but there is always a risk of introducing bias from it. This new Python module will allow users to build a pretty accurate reference using the "whisper" model.
 
-NOTE: These models significantly larger that the Watson STT and much slower to process audio files - Be patient.
+NOTE: These "whisper" models are significantly larger than the Watson STT and much slower to process audio files, depending on the model size you select - Be patient.
 
 ## Install Whisper models
 - Pull the repository locally: https://github.com/openai/whisper
 - Follow the steps to complete the installation: https://github.com/openai/whisper#setup
+- Note the name of your "whisper" root folder
 
 ## Setup
 - Copy the audio files you wish to get transcribed into the "whisper" root folder
-- Copy the new python script `reference-transcripts.py` into the "whisper" root folder
+- From the sub-folder `whisper-script`, copy the new python script `reference-transcripts.py` into the "whisper" root folder above
 
 ## Setup the whisper model language for the audio files
 There are 2 ways to select the whisper model language to be used to transcribe your audio files.
@@ -246,8 +246,8 @@ There are 2 ways to select the whisper model language to be used to transcribe y
 
 You need to update the python script `reference-transcripts.py`, and update the "auto_detect" variable
 
-- auto_detect = True
-- auto_detect = False ===> you will need to set a default language for all your files by setting the variable audio_lang=<language_id>
+- auto_detect = True # Set to True if you do not know the language of the audio
+- default_lang = 'en' # If auto_detect is False, this value will be used for all audio files
 
 TIP: You can use the same first 2 letters of the Watson STT model you wish to evaluate (eg. en-GB_Telephony ==> "en" / pt-BR_Telephony ==> "pt")
 

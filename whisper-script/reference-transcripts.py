@@ -6,7 +6,9 @@ model = whisper.load_model("medium")
 #list audio files in current folder
 
 files=os.listdir('.')
-auto_detect = True
+# Select the language of the Whisper model
+auto_detect = True # Set to True if you do not know the language of the audio
+default_lang = 'en' # If auto_detect is True, this value is ignored
 
 #Process each audio files in whisper, wirting in reference_transcriptions_whisper.csv
 with open('./reference_transcriptions_whisper.csv','w', encoding='utf-8') as csvfile:
@@ -16,7 +18,7 @@ with open('./reference_transcriptions_whisper.csv','w', encoding='utf-8') as csv
 
     for f in files:
         #Transcribing WAV, MP3 or WEBM audio files only
-        if (f.endswith(".wav")) or (f.endswith(".mp3")) or (f.endswith(".webm")):
+        if (f.endswith(".wav")) or (f.endswith(".mp3")) or (f.endswith(".webm")) :
             # load audio and pad/trim it to fit 30 seconds
             audio = whisper.load_audio(f)
             audio = whisper.pad_or_trim(audio)
@@ -29,7 +31,7 @@ with open('./reference_transcriptions_whisper.csv','w', encoding='utf-8') as csv
                 _, probs = model.detect_language(mel)
                 audio_lang = max(probs, key=probs.get)
             else:
-                audio_lang='<put_default_language_id_here>'
+                audio_lang=default_lang
 
             #transcribing audio with whisper model
             print(f"Processing audio file {f} using language {audio_lang}")
