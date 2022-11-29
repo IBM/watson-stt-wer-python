@@ -5,7 +5,7 @@ Utilities for
 
 ## More documentation
 This readme describes the tools in depth.  For more information on use cases and methodology, please see the following articles:
-* [New Python Scripts to Measure Word Error Rate on Watson Speech to Text](https://medium.com/@marconoel/new-python-scripts-to-measure-word-error-rate-on-watson-speech-to-text-77ecaa513f60): How to use these tools, including a YouTube video demonstration 
+* [New Python Scripts to Measure Word Error Rate on Watson Speech to Text](https://medium.com/@marconoel/new-python-scripts-to-measure-word-error-rate-on-watson-speech-to-text-77ecaa513f60): How to use these tools, including a YouTube video demonstration
 * [New Speech Testing Utilities for Conversational AI Projects](https://medium.com/ibm-watson-speech-services/new-speech-testing-utilities-for-conversational-ai-projects-bf73debe19be): Describes recipe for using Text to Speech to "bootstrap" testing data
 * [Data Collection and Training for Speech Projects](https://medium.com/ibm-data-ai/data-collection-and-training-for-speech-projects-22004c3e84fb): How to collect test data from human voices.
 * [How to Train your Speech to Text Dragon](https://medium.com/ibm-watson/watson-speech-to-text-how-to-train-your-own-speech-dragon-part-1-data-collection-and-fdd8cea4f4b8)
@@ -59,7 +59,7 @@ Required configuration parameters:
 * base_model_name - Base model for Speech to Text transcription
 
 Optional configuration parameters:
-* max_threads - Maximum number of threads to use with `transcribe.py` to improve performance. 
+* max_threads - Maximum number of threads to use with `transcribe.py` to improve performance.
 * language_model_id - Language model customization ID (comment out to use base model)
 * acoustic_model_id - Acoustic model customization ID (comment out to use base model)
 * grammar_name - Grammar name (comment out to use base model)
@@ -132,7 +132,7 @@ The `models.py` script has wrappers for many model-related tasks including creat
 Update the parameters in your `config.ini` file.
 
 Required configuration parameters:
-* apikey - API key for your Speech to Text instance
+* apikey - API key for your Speech to Text instance - NOTE: Make sure you delete the following comment "# pragma: allowlist secret" at the end of the line
 * service_url - Reference URL for your Speech to Text instance
 * base_model_name - Base model for Speech to Text transcription
 
@@ -188,7 +188,7 @@ Note some parameter combinations are not possible.  The operations supported all
 # Sample setup for organizing multiple experiments
 Instructions for creating a directory structure for organizing input and output files for experiments for multiple models. Creating a new directory structure is recommend for each new model being experimented/tested. A sample `MemberID` model is shown.
 1. Start from root of WER tool directory, `cd WATSON-STT-WER-PYTHON`
-1. Create project directory, `mkdir -p <project name>` 
+1. Create project directory, `mkdir -p <project name>`
     1. e.g. `mkdir -p ClientName-data`
 1. Create audio directory, `mkdir -p <project name>/audios/<audio type>`
     1. e.g. `mkdir -p ClientName-data/audios/audio.memberID`
@@ -197,7 +197,7 @@ Instructions for creating a directory structure for organizing input and output 
 1. Create referemce transcriptions directory, `mkdir -p <project name>/reference_transcriptions`
     1. e.g. `mkdir -p ClientName-data/reference_transcriptions`
     1. copy/upload transcription file to directory
-        1. e.g. `cp/temp/transcriptions/reference_transcription_memberID.csv ClientName-data/reference_transcriptions` 
+        1. e.g. `cp/temp/transcriptions/reference_transcription_memberID.csv ClientName-data/reference_transcriptions`
 1. Create experiments directory, `mkdir -p <project name>/experiments/<model description base>/<model detail>`
     1. e.g. `mkdir -p ClientName-data/experiments/telephony_base/MemberID/`
 1. Copy sample config file over to directory
