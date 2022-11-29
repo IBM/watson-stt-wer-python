@@ -216,10 +216,7 @@ def run(config_file:str):
     transcriber = Transcriber(config)
 
     audio_file_dir    = config.getValue("Transcriptions","audio_file_folder")
-    max_threads   = config.getValue("SpeechToText","max_threads")
-    if max_threads is None:
-        max_threads=1
-    print("max_threads: ", max_threads)
+    max_threads   = int(config.getValue("SpeechToText","max_threads", 1))
 
     output_dir = os.path.dirname(config.getValue("ErrorRateOutput", "summary_file"))
     if output_dir is not None and len(output_dir) > 0:
