@@ -134,27 +134,30 @@ class Transcriber:
 
         #print(f"Requesting transcription of {filename}")
         with open(filename, "rb") as audio_file:
-            self.STT.recognize_using_websocket(audio=AudioSource(audio_file),
-                content_type=self.getAudioType(filename),
-                recognize_callback=callback,
-                model=base_model,
-                language_customization_id=language_customization_id,
-                acoustic_customization_id=acoustic_customization_id,
-                grammar_name=grammar_name,
-                end_of_phrase_silence_time=end_of_phrase_silence_time,
-                inactivity_timeout=inactivity_timeout,
-                speech_detector_sensitivity=speech_detector_sensitivity,
-                background_audio_suppression=background_audio_suppression,
-                smart_formatting=smart_formatting,
-                low_latency=low_latency,
-                skip_zero_len_words=skip_zero_len_words,
-                character_insertion_bias=character_insertion_bias,
-                customization_weight=customization_weight,
-                #At most one of interim_results and audio_metrics can be True
-                interim_results=interim_results,
-                audio_metrics=audio_metrics
-            )
-            #print(f"Requested transcription of {filename}")
+            try:
+                self.STT.recognize_using_websocket(audio=AudioSource(audio_file),
+                    content_type=self.getAudioType(filename),
+                    recognize_callback=callback,
+                    model=base_model,
+                    language_customization_id=language_customization_id,
+                    acoustic_customization_id=acoustic_customization_id,
+                    grammar_name=grammar_name,
+                    end_of_phrase_silence_time=end_of_phrase_silence_time,
+                    inactivity_timeout=inactivity_timeout,
+                    speech_detector_sensitivity=speech_detector_sensitivity,
+                    background_audio_suppression=background_audio_suppression,
+                    smart_formatting=smart_formatting,
+                    low_latency=low_latency,
+                    skip_zero_len_words=skip_zero_len_words,
+                    character_insertion_bias=character_insertion_bias,
+                    customization_weight=customization_weight,
+                    #At most one of interim_results and audio_metrics can be True
+                    interim_results=interim_results,
+                    audio_metrics=audio_metrics
+                )
+                #print(f"Requested transcription of {filename}")
+            except Exception as e:
+                print(f"Error transcribing {filename}:",e)
 
     def report(self):
         report_file_name = self.config.getValue("Transcriptions", "stt_transcriptions_file")
