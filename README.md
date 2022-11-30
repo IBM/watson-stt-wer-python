@@ -132,7 +132,7 @@ The `models.py` script has wrappers for many model-related tasks including creat
 Update the parameters in your `config.ini` file.
 
 Required configuration parameters:
-* apikey - API key for your Speech to Text instance - NOTE: Make sure you delete the following comment "# pragma: allowlist secret" at the end of the line
+* apikey - API key for your Speech to Text instance
 * service_url - Reference URL for your Speech to Text instance
 * base_model_name - Base model for Speech to Text transcription
 
