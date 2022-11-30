@@ -10,7 +10,8 @@ class Config:
 
     def __init__(self, config_file:str):
         # (interpolation=None) so that '%' is not treated like an environment variable
-        self.config = configparser.ConfigParser(interpolation=None)
+         # inline_comment_prefixes allows comments inline, after the value
+        self.config = configparser.ConfigParser(interpolation=None, inline_comment_prefixes='#;')
         self.config.read(config_file)
 
     def getBoolean(self, section, key, default_value=None):
