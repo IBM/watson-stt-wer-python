@@ -15,100 +15,86 @@ import pandas as pd
 import transcribe
 import analyze
 
-def run_experiment(config_file, output_dir, stt_param_name, stt_config_val):
+class Experiments:
+    def __init__(self, config, output_dir):
+        self.config = config
+        self.output_dir = output_dir
 
-        if type(stt_config_val) == float:
-            exp_setting = float("{:.2f}".format(stt_config_val))
-        else:
-            exp_setting = stt_config_val
+    def run_all_experiments(self, bias_range, weight_range, sds_range, bas_range, max_threads):
+        weight_values = list(weight_range)
+        sds_values = list(sds_range)
+        bas_values = list(bas_range)
+        for bias in bias_range:
+            for weight in weight_values:
+                for sds in sds_values:
+                    for bas in bas_values:
+                        counter=0
+                        bias = round(bias,1)
+                        weight = round(weight, 1)
+                        print(bias, weight, sds, bas)
 
-        # Set path variables & create output directory
-        experiment_dir = stt_param_name + "_" + str(exp_setting)
+                        experiment_output_dir = self.output_dir + "/" + bias + "_" + weight + "_" + sds + "_" + bas
+                        os.makedirs(experiment_output_dir, exist_ok=True)
 
-        path = output_dir + "/" + stt_param_name + "_" + str(exp_setting)
-        os.makedirs(path, exist_ok=True)
+                        exp_config_path = experiment_output_dir + "/" + self.config
+                        copyfile(self.config, exp_config_path)
 
-        exp_config_path = path + "/" + "config.ini"
-        copyfile(config_file, exp_config_path)
+                        #Update config settings for the experiment
+                        exp_config = Config(exp_config_path)
 
-        #Update config settings for the experiment
-        exp_config = Config(exp_config_path)
+                        file_info = os.path.split(exp_config.getValue('ErrorRateOutput', 'details_file'))
+                        details_file = os.path.join(file_info[0], experiment_output_dir, file_info[1])
+                        exp_config.setValue('ErrorRateOutput', 'details_file', details_file)
 
-        exp_config.setValue('SpeechToText', stt_param_name, str(exp_setting))
+                        file_info = os.path.split(exp_config.getValue('ErrorRateOutput', 'summary_file'))
+                        details_file = os.path.join(file_info[0], experiment_output_dir, file_info[1])
+                        exp_config.setValue('ErrorRateOutput', 'summary_file', details_file)
 
-        file_info = os.path.split(exp_config.getValue('ErrorRateOutput', 'details_file'))
-        details_file = os.path.join(file_info[0], experiment_dir, file_info[1])
-        exp_config.setValue('ErrorRateOutput', 'details_file', details_file)
+                        file_info = os.path.split(exp_config.getValue('ErrorRateOutput', 'word_accuracy_file'))
+                        details_file = os.path.join(file_info[0], experiment_output_dir, file_info[1])
+                        exp_config.setValue('ErrorRateOutput', 'word_accuracy_file', details_file)
 
-        file_info = os.path.split(exp_config.getValue('ErrorRateOutput', 'summary_file'))
-        details_file = os.path.join(file_info[0], experiment_dir, file_info[1])
-        exp_config.setValue('ErrorRateOutput', 'summary_file', details_file)
+                        file_info = os.path.split(exp_config.getValue('Transcriptions', 'stt_transcriptions_file'))
+                        details_file = os.path.join(file_info[0], experiment_output_dir, file_info[1])
+                        exp_config.setValue('Transcriptions', 'stt_transcriptions_file', details_file)
+                                                
+                        exp_config.setValue('SpeechToText', "max_threads", int(max_threads))
 
-        file_info = os.path.split(exp_config.getValue('ErrorRateOutput', 'word_accuracy_file'))
-        details_file = os.path.join(file_info[0], experiment_dir, file_info[1])
-        exp_config.setValue('ErrorRateOutput', 'word_accuracy_file', details_file)
+                        exp_config.setValue('SpeechToText', "speech_detector_sensitivity", float(sds))
+                        exp_config.setValue('SpeechToText', "background_audio_suppression", float(bas))
+                        exp_config.setValue('SpeechToText', "character_insertion_bias", float(bias))
+                        exp_config.setValue('SpeechToText', "customization_weight", float(weight))
 
-        file_info = os.path.split(exp_config.getValue('Transcriptions', 'stt_transcriptions_file'))
-        details_file = os.path.join(file_info[0], experiment_dir, file_info[1])
-        exp_config.setValue('Transcriptions', 'stt_transcriptions_file', details_file)
+                        #Get Transcriptions 
+                        transcribe.run(exp_config_path)
 
-        exp_config.writeFile(exp_config_path)
+                        #Get Analysis
+                        analyze.run(exp_config_path)
 
-        #Get Transcriptions 
-        transcribe.run(exp_config_path)
+    def run_report(output_dir, config):
+        print(f"Reporting from {output_dir}")
 
-        #Get Analysis
-        analyze.run(exp_config_path)
+        # Extract all summaries
+        wer_summary_filename = os.path.split(config.getValue("ErrorRateOutput", "summary_file"))[1]
+        summary_tuples = []
+        summary_files = glob.glob(f"{output_dir}/**/*{wer_summary_filename}")
+        for file in summary_files:
+            with open(file) as json_file:
+                summary_tuples.append(json.load(json_file))
 
-def run_all_experiments(config_file, output_dir):
+        # Open summary file for writing
+        output_filename = output_dir + '/experiment_summary.csv'
+        with open(output_filename, 'w') as data_file:
+            dict_writer = csv.DictWriter(data_file, fieldnames=summary_tuples[0].keys())
+            dict_writer.writeheader()
+            dict_writer.writerows(summary_tuples)
+            print(f"Wrote experiment summary to {output_filename}")
 
-    #Customize this function to process the configuration settings
-    #that need to be tested
-
-    #Set variable for stt configuration to iterate through
-#    customization_weight = 0.1
-    character_insertion_bias = 0.0
-#    background_audio_suppression = 0.0
-#    speech_detector_sensitivity = 0.0
-
-    #Iterate through possible values of the setting.
-#    while customization_weight < 1.0:
-    while character_insertion_bias < 1.0:
-#    while background_audio_suppression < 1.0:
-#    while speech_detector_sensitivity < 1.0:
-
-        #Run the experiment for the specific configuration value
-        #You must include the exact name of the stt parameter being tested
-#        run_experiment(config_file, output_dir, "customization_weight", customization_weight)
-        run_experiment(config_file, output_dir, "character_insertion_bias", character_insertion_bias)
-#        run_experiment(config_file, output_dir, "background_audio_suppression", background_audio_suppression)
-#        run_experiment(config_file, output_dir, "speech_detector_sensitivity", speech_detector_sensitivity)
-
-        #Move to the next value to be tested
-#        customization_weight = customization_weight + 0.1
-        character_insertion_bias = character_insertion_bias + 0.05
-#        background_audio_suppression = background_audio_suppression + 0.05
-#        speech_detector_sensitivity = speech_detector_sensitivity + 0.05
-
-
-def run_report(output_dir, config):
-    print(f"Reporting from {output_dir}")
-
-    # Extract all summaries
-    wer_summary_filename = os.path.split(config.getValue("ErrorRateOutput", "summary_file"))[1]
-    summary_tuples = []
-    summary_files = glob.glob(f"{output_dir}/**/*{wer_summary_filename}")
-    for file in summary_files:
-        with open(file) as json_file:
-            summary_tuples.append(json.load(json_file))
-
-    # Open summary file for writing
-    output_filename = output_dir + '/experiment_summary.csv'
-    with open(output_filename, 'w') as data_file:
-        dict_writer = csv.DictWriter(data_file, fieldnames=summary_tuples[0].keys())
-        dict_writer.writeheader()
-        dict_writer.writerows(summary_tuples)
-        print(f"Wrote experiment summary to {output_filename}")
+def drange(start, stop, step):
+    r = start
+    while r < stop:
+        yield r
+        r += step
 
 def main():
 
@@ -126,7 +112,33 @@ def main():
         output_dir = "."
     #print(output_dir)
 
-    run_all_experiments(config_file, output_dir)
+    #run_all_experiments(config_file, output_dir)
+
+    # build generators
+    experiments = Experiments(config, output_dir)
+    max_threads = int(config.getValue("SpeechToText","max_threads", 1))
+    sds_min  = float(config.getValue("SpeechToText", "sds_min"))
+    sds_max  = float(config.getValue("SpeechToText", "sds_max"))
+    sds_step  = float(config.getValue("SpeechToText", "sds_step"))
+    bias_min  = float(config.getValue("SpeechToText", "bias_min"))
+    bias_max  = float(config.getValue("SpeechToText", "bias_max"))
+    bias_step  = float(config.getValue("SpeechToText", "bias_step"))
+    cust_weight_min  = float(config.getValue("SpeechToText", "cust_weight_min"))
+    cust_weight_max  = float(config.getValue("SpeechToText", "cust_weight_max"))
+    cust_weight_step  = float(config.getValue("SpeechToText", "cust_weight_step"))
+    bas_min = float(config.getValue("SpeechToText", "bas_min"))
+    bas_max = float(config.getValue("SpeechToText", "bas_max"))
+    bas_step = float(config.getValue("SpeechToText", "bas_step"))
+
+    base_model_name = str(config.getValue("SpeechToText", "base_model_name"))
+    custom_model = str(config.getValue("SpeechToText", "language_model_id"))
+    
+    bias_range = drange(bias_min, bias_max+bias_step, bias_step) if base_model_name.find('bandModel') == -1 else drange(0.0, 0.1, 0.1)
+    weight_range = drange(cust_weight_min, cust_weight_max+cust_weight_step, cust_weight_step) if custom_model else drange(0.0, 0.1, 0.1)
+    sds_range = drange(sds_min, sds_max+sds_step, sds_step) 
+    bas_range = drange(bas_min, bas_max+bas_step, bas_step)
+    
+    experiments.run_all_experiments(bias_range, weight_range, sds_range, bas_range, max_threads)
 
     run_report(output_dir, config)
 
