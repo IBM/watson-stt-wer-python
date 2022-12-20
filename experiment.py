@@ -1,8 +1,10 @@
+import argparse
 import os
 import sys
 import re
 import csv
 import json
+import logging
 from shutil import copyfile
 from config import Config
 import subprocess
@@ -14,6 +16,9 @@ import pandas as pd
 
 import transcribe
 import analyze
+
+DEFAULT_CONFIG_INI='config.ini'
+DEFAULT_LOGLEVEL='DEBUG'
 
 class Experiments:
     def __init__(self, config, output_dir):
@@ -30,7 +35,7 @@ class Experiments:
                     for bas in bas_values:
                         bias = round(bias,1)
                         weight = round(weight, 1)
-                        print(bias, weight, sds, bas)
+                        logging.debug(bias, weight, sds, bas)
 
                         experiment_output_dir = self.output_dir + "/" + str(bias) + "_" + str(weight) + "_" + str(sds) + "_" + str(bas)
                         os.makedirs(experiment_output_dir, exist_ok=True)
@@ -71,15 +76,15 @@ class Experiments:
                         exp_config.writeFile(exp_config_path)
 
                         #Get Transcriptions 
-                        transcribe.run(exp_config_path)
+                        transcribe.run(exp_config_path, "WARN")
 
                         #Get Analysis
-                        analyze.run(exp_config_path)
+                        analyze.run(exp_config_path, "WARN")
 
 
 
     def run_report(self, output_dir, config):
-        print(f"Reporting from {output_dir}")
+        logging.debug(f"Reporting from {output_dir}")
 
         # Extract all summaries
         wer_summary_filename = os.path.split(config.getValue("ErrorRateOutput", "summary_file"))[1]
@@ -90,12 +95,12 @@ class Experiments:
                 summary_tuples.append(json.load(json_file))
 
         # Open summary file for writing
-        output_filename = output_dir + '/experiment_summary.csv'
+        output_filename = output_dir + '/all_summaries.csv'
         with open(output_filename, 'w') as data_file:
             dict_writer = csv.DictWriter(data_file, fieldnames=summary_tuples[0].keys())
             dict_writer.writeheader()
             dict_writer.writerows(summary_tuples)
-            print(f"Wrote experiment summary to {output_filename}")
+            logging.debug(f"Wrote experiment summary to {output_filename}")
 
 def drange(start, stop, step):
     r = start
@@ -103,14 +108,10 @@ def drange(start, stop, step):
         yield r
         r += step
 
-def main():
+def run(config_file:str, logging_level:str=DEFAULT_LOGLEVEL):
 
-    # Create config file for experiment
-    config_file = "config.ini"
-    if len(sys.argv) > 1:
-       config_file = sys.argv[1]
-    else:
-       print("Using default config filename: config.ini.")
+    logging.basicConfig(level=logging_level, format='%(asctime)s - %(levelname)s - %(message)s')
+    logging.debug(f"Using config file:{config_file}")
 
     config = Config(config_file)
 
@@ -149,4 +150,12 @@ def main():
     experiments.run_report(output_dir, config)
 
 if __name__ == '__main__':
-    main()
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument(
+        '-c', '--config', type=str, default=DEFAULT_CONFIG_INI, help='the config file to use')
+    parser.add_argument(
+        '-ll', '--log-level', type=str, default=DEFAULT_LOGLEVEL, help='the log level to use')
+
+    args = parser.parse_args()
+
+    run(args.config, args.log_level)
