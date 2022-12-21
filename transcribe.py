@@ -101,7 +101,7 @@ class Transcriber:
             return None
 
     def transcribe(self, filename):
-        logging.debug(f"Transcribing from {filename}")
+        logging.debug(f"Transcribing file: {filename}")
 
         #Model connection configs
         base_model                = self.config.getValue("SpeechToText", "base_model_name")
@@ -174,7 +174,7 @@ class Transcriber:
             writer = csv.writer(csvfile)
             writer.writerow(csv_columns)
             writer.writerows(data.items())
-            logging.debug(f"Wrote transcriptions for {len(data)} audio files to {report_file_name}")
+            logging.info(f"Wrote transcriptions for {len(data)} audio files to {report_file_name}")
 
         reference_file_name = self.config.getValue("Transcriptions", "reference_transcriptions_file")
         if reference_file_name is not None:
@@ -202,7 +202,7 @@ class Transcriber:
                         #print(comparison_result)
 
                         comparison_result.to_csv(report_file_name, index=False)
-                        logging.debug(f"Updated {report_file_name} with reference transcriptions")
+                        logging.info(f"Updated {report_file_name} with reference transcriptions")
             except Exception as e:
                 logging.warning(f"Failed to merge reference transcriptions into {report_file_name}:", exc_info=e)
                 
@@ -222,8 +222,20 @@ def run(config_file:str, logging_level:str=DEFAULT_LOGLEVEL):
         os.makedirs(output_dir, exist_ok=True)
 
     files = [audio_file_dir + "/" + f for f in os.listdir(audio_file_dir)]
+    total_files=len(files)
+    complete_files=0
     with concurrent.futures.ThreadPoolExecutor(max_workers=max_threads) as executor:
-        executor.map(transcriber.transcribe,files)
+        #executor.map(transcriber.transcribe,files)
+        futures = [executor.submit(transcriber.transcribe, file) for file in files]
+        for future in concurrent.futures.as_completed(futures):
+            complete_files+=1
+            if complete_files%100==0:
+                logging.info(f"Completed transcribing {complete_files} files out of {total_files}")
+    
+    if complete_files != total_files:
+        logging.error(f"Only {complete_files} out of {total_files} were transcribed.")
+    else:
+        logging.info(f"Completed transcribing {complete_files} files out of {total_files}")
 
     transcriber.report()
 

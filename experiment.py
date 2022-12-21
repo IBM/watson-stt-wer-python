@@ -18,14 +18,14 @@ import transcribe
 import analyze
 
 DEFAULT_CONFIG_INI='config.ini'
-DEFAULT_LOGLEVEL='DEBUG'
+DEFAULT_LOGLEVEL='INFO'
 
 class Experiments:
     def __init__(self, config, output_dir):
         self.config = config
         self.output_dir = output_dir
 
-    def run_all_experiments(self, bias_range, weight_range, sds_range, bas_range, max_threads):
+    def run_all_experiments(self, bias_range, weight_range, sds_range, bas_range, max_threads, logging_level):
         weight_values = list(weight_range)
         sds_values = list(sds_range)
         bas_values = list(bas_range)
@@ -35,7 +35,7 @@ class Experiments:
                     for bas in bas_values:
                         bias = round(bias,1)
                         weight = round(weight, 1)
-                        logging.debug(bias, weight, sds, bas)
+                        logging.info(f"Running Experiment -- Character Insertion Bias: {bias}, Customization Weight: {weight}, Speech Detector Sensitivity: {sds}, Background Audio Suppression: {bas}")
 
                         experiment_output_dir = self.output_dir + "/" + str(bias) + "_" + str(weight) + "_" + str(sds) + "_" + str(bas)
                         os.makedirs(experiment_output_dir, exist_ok=True)
@@ -76,15 +76,18 @@ class Experiments:
                         exp_config.writeFile(exp_config_path)
 
                         #Get Transcriptions 
-                        transcribe.run(exp_config_path, "WARN")
+                        transcribe.run(exp_config_path, logging_level)
 
                         #Get Analysis
-                        analyze.run(exp_config_path, "WARN")
+                        analyze.run(exp_config_path, logging_level)
+
+                        logging.info(f"Experiment Complete \n")
+
 
 
 
     def run_report(self, output_dir, config):
-        logging.debug(f"Reporting from {output_dir}")
+        logging.debug(f"Generating summary report in {output_dir}")
 
         # Extract all summaries
         wer_summary_filename = os.path.split(config.getValue("ErrorRateOutput", "summary_file"))[1]
@@ -100,7 +103,7 @@ class Experiments:
             dict_writer = csv.DictWriter(data_file, fieldnames=summary_tuples[0].keys())
             dict_writer.writeheader()
             dict_writer.writerows(summary_tuples)
-            logging.debug(f"Wrote experiment summary to {output_filename}")
+            logging.info(f"Wrote consolidated summary to {output_filename}")
 
 def drange(start, stop, step):
     r = start
@@ -145,7 +148,7 @@ def run(config_file:str, logging_level:str=DEFAULT_LOGLEVEL):
     sds_range = drange(sds_min, sds_max+sds_step, sds_step) 
     bas_range = drange(bas_min, bas_max+bas_step, bas_step)
     
-    experiments.run_all_experiments(bias_range, weight_range, sds_range, bas_range, max_threads)
+    experiments.run_all_experiments(bias_range, weight_range, sds_range, bas_range, max_threads, logging_level)
 
     experiments.run_report(output_dir, config)
 

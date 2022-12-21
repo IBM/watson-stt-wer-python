@@ -109,7 +109,6 @@ class AnalysisResults:
         return results
 
     def write_details(self, filename):
-        logging.debug(f"Writing detailed results to {filename}")
         csv_columns = self.headers
 
         with open(filename, 'w') as csvfile:
@@ -117,15 +116,17 @@ class AnalysisResults:
             writer.writerow(csv_columns)
             for result in self.results:
                 writer.writerow(result.data.values())
+        
+        logging.info(f"Wrote detailed results to {filename}")
 
     def write_summary(self, filename):
-        logging.debug(f"Writing summary results to {filename}")
 
         with open(filename, 'w') as jsonfile:
             json.dump(self.get_summary(), jsonfile, indent=2)
+        
+        logging.info(f"Wrote summary results to {filename}")
 
     def write_word_accuracy(self, filename):
-        logging.debug(f"Writing word accuracy results to {filename}")
         csv_columns = ['word','count','errors','error_rate']
 
         with open(filename, 'w') as csvfile:
@@ -133,6 +134,8 @@ class AnalysisResults:
             writer.writeheader()
             for word in self.word_map:
                 writer.writerow(self.word_map[word])
+
+        logging.info(f"Wrote word accuracy results to {filename}")
 
 class Analyzer:
     def __init__(self, config):
