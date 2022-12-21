@@ -258,10 +258,10 @@ def run(config_file:str, logging_level:str=DEFAULT_LOGLEVEL):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument(
-        '-c', '--config', type=str, default=DEFAULT_CONFIG_INI, help='the config file to use')
+        '-c', '--config_file', type=str, default=DEFAULT_CONFIG_INI, help='the config file to use')
     parser.add_argument(
-        '-ll', '--log-level', type=str, default=DEFAULT_LOGLEVEL, help='the log level to use')
+        '-ll', '--log_level', type=str, default=DEFAULT_LOGLEVEL, help='the log level to use')
 
     args = parser.parse_args()
 
-    run(args.config, args.log_level)
+    run(args.config_file, args.log_level)
