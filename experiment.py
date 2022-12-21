@@ -33,8 +33,6 @@ class Experiments:
             for weight in weight_values:
                 for sds in sds_values:
                     for bas in bas_values:
-                        bias = round(bias,1)
-                        weight = round(weight, 1)
                         logging.info(f"Running Experiment -- Character Insertion Bias: {bias}, Customization Weight: {weight}, Speech Detector Sensitivity: {sds}, Background Audio Suppression: {bas}")
 
                         experiment_output_dir = self.output_dir + "/" + str(bias) + "_" + str(weight) + "_" + str(sds) + "_" + str(bas)
