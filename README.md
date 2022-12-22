@@ -46,6 +46,16 @@ cp config.ini.sample config.ini
 
 Each sub-sections will describe what configuration parameters are needed.
 
+# Generic Command-Line parameters
+
+`--config_file` or `-c` is the configuration file to be used. The default is `config.ini`
+
+`--log_level` or `-ll` is the log level to be used when running the script. Supported levels are as follows:
+- `ERROR` -- Print out only when things fail.
+- `WARN` -- Print out cautions and when things fail.
+- `INFO` -- (Default) Print out useful status, cautions, and when things fail.
+- `DEBUG` -- Print out every possible message.
+
 # Transcription
 Uses IBM Watson Speech to Text service to transcribe a folder full of audio files.  Creates a CSV with transcriptions.
 
@@ -77,6 +87,8 @@ Assuming your configuration is in `config.ini`, transcribe all the audio files i
 ```
 python transcribe.py --config_file config.ini --log_level DEBUG
 ```
+
+See [Generic Command Line Parameters](#generic-command-line-parameters) for more details.
 
 ## Output
 Transcription will be stored in a CSV file based on `stt_transcriptions_file` parameter with a format like below:
@@ -119,6 +131,8 @@ The minimum-edit distance is calculated using the python C module python-Levensh
 python analyze.py --config_file config.ini --log_level DEBUG
 ```
 
+See [Generic Command Line Parameters](#generic-command-line-parameters) for more details.
+
 # Experimenting
 Use the `experiment.py` script to execute a series of Transcription/Analyze experiments to optimize SpeechToText parameters. 
 
@@ -139,6 +153,8 @@ The following parameters in `[Experiments]` all have a `*_min` and `*_max` varia
 ```
 python experiment.py --config_file config.ini --log_level INFO
 ```
+
+See [Generic Command Line Parameters](#generic-command-line-parameters) for more details.
 
 ## Results
 Each experiment creates a unique directory based on the parameters of that experiment in the format `bias + "_" + weight + "_" + sds + "_" + bas`.
