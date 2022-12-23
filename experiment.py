@@ -33,6 +33,12 @@ class Experiments:
             for weight in weight_values:
                 for sds in sds_values:
                     for bas in bas_values:
+
+                        bias = round(bias, 2)
+                        weight = round(weight, 2)
+                        sds = round(sds, 2)
+                        bas = round(bas,2)
+
                         logging.info(f"Running Experiment -- Character Insertion Bias: {bias}, Customization Weight: {weight}, Speech Detector Sensitivity: {sds}, Background Audio Suppression: {bas}")
 
                         experiment_output_dir = self.output_dir + "/" + str(bias) + "_" + str(weight) + "_" + str(sds) + "_" + str(bas)
@@ -142,7 +148,7 @@ def run(config_file:str, logging_level:str=DEFAULT_LOGLEVEL):
     custom_model = str(config.getValue("SpeechToText", "language_model_id"))
     
     bias_range = drange(bias_min, bias_max+bias_step, bias_step)
-    weight_range = drange(cust_weight_min, cust_weight_max+cust_weight_step, cust_weight_step) if custom_model else drange(0.0, 0.1, 0.1)
+    weight_range = drange(cust_weight_min, cust_weight_max+cust_weight_step, cust_weight_step) if custom_model==None else drange(0.0, 0.1, 0.1)
     sds_range = drange(sds_min, sds_max+sds_step, sds_step) 
     bas_range = drange(bas_min, bas_max+bas_step, bas_step)
     
