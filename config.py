@@ -11,6 +11,7 @@ class Config:
     def __init__(self, config_file:str):
         # (interpolation=None) so that '%' is not treated like an environment variable
          # inline_comment_prefixes allows comments inline, after the value
+        self.config_file = config_file
         self.config = configparser.ConfigParser(interpolation=None, inline_comment_prefixes='#;')
         self.config.read(config_file)
 

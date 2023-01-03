@@ -1,4 +1,5 @@
 from datetime import datetime
+import argparse
 import json
 import os
 import sys
@@ -7,6 +8,7 @@ import csv
 import concurrent.futures
 import threading
 from config import Config
+import logging
 
 from ibm_watson import SpeechToTextV1
 from ibm_cloud_sdk_core.authenticators import IAMAuthenticator
@@ -20,6 +22,9 @@ from os import path
 import pandas as pd
 
 from uuid import uuid4
+
+DEFAULT_CONFIG_INI='config.ini'
+DEFAULT_LOGLEVEL='DEBUG'
 
 class Transcriptions:
     data = {}
@@ -48,13 +53,13 @@ class MyRecognizeCallback(RecognizeCallback):
             #print(transcription)
             self.transcriptions.add(self.audio_file_name, transcription)
         except:
-            print(f"{self.audio_file_name} - No transcription found", sys.stderr)
+            logging.exception(f"{self.audio_file_name} - No transcription found")
 
     def on_error(self, error):
-        print(f'{self.audio_file_name} - Recognize Error received: {error}', file=sys.stderr)
+        logging.error(f'{self.audio_file_name} - Recognize Error received: {error}')
 
     def on_inactivity_timeout(self, error):
-        print(f'{self.audio_file_name} - Inactivity timeout: {error}', file=sys.stderr)
+        logging.error(f'{self.audio_file_name} - Inactivity timeout: {error}')
 
 class Transcriber:
 
@@ -96,7 +101,7 @@ class Transcriber:
             return None
 
     def transcribe(self, filename):
-        print(f"Transcribing from {filename}")
+        logging.debug(f"Transcribing file: {filename}")
 
         #Model connection configs
         base_model                = self.config.getValue("SpeechToText", "base_model_name")
@@ -130,7 +135,7 @@ class Transcriber:
             new_headers=self.STT.default_headers
             new_headers['X-Global-Transaction-Id']=transaction_id
             self.STT.set_default_headers(new_headers)
-            print("--> Transaction ID:", self.STT.default_headers['X-Global-Transaction-Id'])
+            logging.deubg("--> Transaction ID:", self.STT.default_headers['X-Global-Transaction-Id'])
 
         #print(f"Requesting transcription of {filename}")
         with open(filename, "rb") as audio_file:
@@ -157,7 +162,7 @@ class Transcriber:
                 )
                 #print(f"Requested transcription of {filename}")
             except Exception as e:
-                print(f"Error transcribing {filename}:",e)
+                logging.exception(f"Error transcribing {filename}:",exc_info=e)
 
     def report(self):
         report_file_name = self.config.getValue("Transcriptions", "stt_transcriptions_file")
@@ -169,14 +174,13 @@ class Transcriber:
             writer = csv.writer(csvfile)
             writer.writerow(csv_columns)
             writer.writerows(data.items())
-            print(f"Wrote transcriptions for {len(data)} audio files to {report_file_name}")
+            logging.info(f"Wrote transcriptions for {len(data)} audio files to {report_file_name}")
 
         reference_file_name = self.config.getValue("Transcriptions", "reference_transcriptions_file")
         if reference_file_name is not None:
-
             try:
                 if path.exists(reference_file_name):
-                    print(f"Found reference transcriptions file - {reference_file_name} - attempting merge with model's transcriptions")
+                    logging.debug(f"Found reference transcriptions file - {reference_file_name} - attempting merge with model's transcriptions")
 
                     file1_df = pd.read_csv(report_file_name)
                     file2_df = pd.read_csv(reference_file_name)
@@ -184,11 +188,11 @@ class Transcriber:
                     missing_columns = False
                     if not "Audio File Name" in file2_df.columns:
                         missing_columns = True
-                        print(f"Warning: 'Audio File Name' column missing in reference transcriptions file {reference_file_name}; will not merge.")
+                        logging.warning(f"'Audio File Name' column missing in reference transcriptions file {reference_file_name}; will not merge.")
 
                     if not "Reference" in file2_df.columns:
                         missing_columns = True
-                        print(f"Warning: 'Reference' column missing in reference transcriptions file {reference_file_name}; will not merge.")
+                        logging.warning(f"'Reference' column missing in reference transcriptions file {reference_file_name}; will not merge.")
 
                     if not missing_columns:
                         file2_df = file2_df[["Audio File Name", "Reference"]]
@@ -198,22 +202,17 @@ class Transcriber:
                         #print(comparison_result)
 
                         comparison_result.to_csv(report_file_name, index=False)
-                        print(f"Updated {report_file_name} with reference transcriptions")
+                        logging.info(f"Updated {report_file_name} with reference transcriptions")
             except Exception as e:
-                print(f"Warning - Failed to merge reference transcriptions into {report_file_name}:",e)
+                logging.warning(f"Failed to merge reference transcriptions into {report_file_name}:", exc_info=e)
                 
-def main():
-    config_file = "config.ini"
-    if len(sys.argv) > 1:
-       config_file = sys.argv[1]
-    else:
-       print("Using default config filename: config.ini.")
-
-    run(config_file)
-
-def run(config_file:str):
+def run(config_file:str, logging_level:str=DEFAULT_LOGLEVEL):
     config      = Config(config_file)
     transcriber = Transcriber(config)
+
+    logging.basicConfig(level=logging_level, format='%(asctime)s - %(levelname)s - %(message)s')
+
+    logging.debug(f"Using config file:{config_file}")
 
     audio_file_dir    = config.getValue("Transcriptions","audio_file_folder")
     max_threads   = int(config.getValue("SpeechToText","max_threads", 1))
@@ -223,10 +222,30 @@ def run(config_file:str):
         os.makedirs(output_dir, exist_ok=True)
 
     files = [audio_file_dir + "/" + f for f in os.listdir(audio_file_dir)]
+    total_files=len(files)
+    complete_files=0
     with concurrent.futures.ThreadPoolExecutor(max_workers=max_threads) as executor:
-        executor.map(transcriber.transcribe,files)
+        #executor.map(transcriber.transcribe,files)
+        futures = [executor.submit(transcriber.transcribe, file) for file in files]
+        for future in concurrent.futures.as_completed(futures):
+            complete_files+=1
+            if complete_files%100==0:
+                logging.info(f"Completed transcribing {complete_files} files out of {total_files}")
+    
+    if complete_files != total_files:
+        logging.error(f"Only {complete_files} out of {total_files} were transcribed.")
+    else:
+        logging.info(f"Completed transcribing {complete_files} files out of {total_files}")
 
     transcriber.report()
 
 if __name__ == '__main__':
-    main()
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument(
+        '-c', '--config_file', type=str, default=DEFAULT_CONFIG_INI, help='the config file to use')
+    parser.add_argument(
+        '-ll', '--log_level', type=str, default=DEFAULT_LOGLEVEL, help='the log level to use')
+
+    args = parser.parse_args()
+
+    run(args.config_file, args.log_level)

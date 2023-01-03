@@ -7,17 +7,21 @@
 # It computes the minimum-edit distance between the ground-truth sentence and the hypothesis sentence of a speech-to-text API.
 # The minimum-edit distance is calculated using the python C module python-Levenshtein.
 
+import argparse
 import os
 import jiwer
 import json
 import sys
 import csv
+import logging
 from shutil import copyfile
 from os.path import join, dirname
 from config import Config
 import nltk
 from nltk.stem.porter import PorterStemmer
 
+DEFAULT_CONFIG_INI='config.ini'
+DEFAULT_LOGLEVEL='DEBUG'
 
 class AnalysisResult:
     def __init__(self, audio_file_name, reference, hypothesis, cleaned_reference, cleaned_hypothesis, measures, differences):
@@ -105,7 +109,6 @@ class AnalysisResults:
         return results
 
     def write_details(self, filename):
-        print(f"Writing detailed results to {filename}")
         csv_columns = self.headers
 
         with open(filename, 'w') as csvfile:
@@ -113,15 +116,17 @@ class AnalysisResults:
             writer.writerow(csv_columns)
             for result in self.results:
                 writer.writerow(result.data.values())
+        
+        logging.info(f"Wrote detailed results to {filename}")
 
     def write_summary(self, filename):
-        print(f"Writing summary results to {filename}")
 
         with open(filename, 'w') as jsonfile:
             json.dump(self.get_summary(), jsonfile, indent=2)
+        
+        logging.info(f"Wrote summary results to {filename}")
 
     def write_word_accuracy(self, filename):
-        print(f"Writing word accuracy results to {filename}")
         csv_columns = ['word','count','errors','error_rate']
 
         with open(filename, 'w') as csvfile:
@@ -129,6 +134,8 @@ class AnalysisResults:
             writer.writeheader()
             for word in self.word_map:
                 writer.writerow(self.word_map[word])
+
+        logging.info(f"Wrote word accuracy results to {filename}")
 
 class Analyzer:
     def __init__(self, config):
@@ -197,7 +204,7 @@ class Analyzer:
             hypothesis   = hypothesis_dict.get(audio_file_name, None)
 
             if hypothesis is None:
-                print(f"{audio_file_name} - No hypothesis transcription found", sys.stderr)
+                logging.warn(f"{audio_file_name} - No hypothesis transcription found", sys.stderr)
                 continue
 
             # Common pre-processing on ground truth and hypothesis
@@ -231,18 +238,13 @@ class Analyzer:
                     differences.append(word)
         return differences
 
-def main():
-    config_file = "config.ini"
-    if len(sys.argv) > 1:
-       config_file = sys.argv[1]
-    else:
-       print("Using default config filename: config.ini.")
-
-    run(config_file)
-
-def run(config_file:str):
+def run(config_file:str, logging_level:str=DEFAULT_LOGLEVEL):
     config      = Config(config_file)
     analyzer    = Analyzer(config)
+
+    logging.basicConfig(level=logging_level, format='%(asctime)s - %(levelname)s - %(message)s')
+
+    logging.debug(f"Using config file:{config_file}")
 
     output_dir = os.path.dirname(config.getValue("ErrorRateOutput", "summary_file"))
     if output_dir is not None and len(output_dir) > 0:
@@ -254,4 +256,12 @@ def run(config_file:str):
     results.write_word_accuracy(config.getValue("ErrorRateOutput","word_accuracy_file"))
 
 if __name__ == '__main__':
-    main()
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument(
+        '-c', '--config_file', type=str, default=DEFAULT_CONFIG_INI, help='the config file to use')
+    parser.add_argument(
+        '-ll', '--log_level', type=str, default=DEFAULT_LOGLEVEL, help='the log level to use')
+
+    args = parser.parse_args()
+
+    run(args.config_file, args.log_level)
