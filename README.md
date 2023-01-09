@@ -2,6 +2,7 @@
 Utilities for
 * [Transcribing](#transcription) a set of audio files with Speech to Text (STT)
 * [Analyzing](#analysis) the error rate of the STT transcription against a known-good transcription
+    * [Analyzing with sclite](#sclite) is an alternative option for analyzing the STT transcription results
 * [Experimenting](#experimenting) with various parameters to find optimal values
 
 ## More documentation
@@ -132,6 +133,31 @@ python analyze.py --config_file config.ini --log_level DEBUG
 ```
 
 See [Generic Command Line Parameters](#generic-command-line-parameters) for more details.
+
+# sclite
+`sclite` is an open source tool designed to evaluate STT transcription results. More information about `sclite` can be found here -- https://people.csail.mit.edu/joe/sctk-1.2/doc/sclite.htm#sclite_name_0.
+
+This repo provides a wrapper script `analyze_with_sclite.py`, which can be used to run `sclite` and format its output.
+
+## Setup
+1. `reference_transcriptions_file` and `stt_transcriptions_file` must be populated in `config.ini` and exist on the filesystem.
+1. `sclite_directory` must be uncommented and populated with the directory that hold the `sclite` executable
+    1. To install `sclite` follow the instructions here -- https://github.com/usnistgov/SCTK#sctk-basic-installation
+
+## Execution
+
+```
+python analyze_with_sclite.py --config config.ini --log_level INFO
+```
+See [Generic Command Line Parameters](#generic-command-line-parameters) for more details.
+
+## Results
+1. `*.ctm` -- A file containing a line for each transcribed word of each audio file
+1. `*.stm` -- A file containing a reformatted version of the `reference_transcriptions_file` that `sclite` uses for evalutation
+1. `*.sys` -- A summary file showing the number of words, sentences, deletions, insertions, substitutions, word error rate, and sentence error rate.
+1. `*.prf` -- A text alignment file that shows, for each audio file, the reference text and transcribed text, and for each word whether it was inserted, deleted, substituted, or correct.
+1. `*.dtl` -- A detail file showing confusion pairs and which specific words were inserted, deleted, or substituted.
+1. `sclite_wer_summary.json` -- A concise summary of metrics
 
 # Experimenting
 Use the `experiment.py` script to execute a series of Transcription/Analyze experiments to optimize SpeechToText parameters. 
