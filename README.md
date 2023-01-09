@@ -2,7 +2,7 @@
 Utilities for
 * [Transcribing](#transcription) a set of audio files with Speech to Text (STT)
 * [Analyzing](#analysis) the error rate of the STT transcription against a known-good transcription
-    * [Analyzing with sclite](#sclite) is an alternative option for analyzing the STT transcription results
+    * [Analyzing with sclite](#analysis-with-sclite) is an alternative option for analyzing the STT transcription results
 * [Experimenting](#experimenting) with various parameters to find optimal values
 
 ## More documentation
@@ -134,7 +134,7 @@ python analyze.py --config_file config.ini --log_level DEBUG
 
 See [Generic Command Line Parameters](#generic-command-line-parameters) for more details.
 
-# sclite
+# Analysis with sclite
 `sclite` is an open source tool designed to evaluate STT transcription results. More information about `sclite` can be found here -- https://people.csail.mit.edu/joe/sctk-1.2/doc/sclite.htm#sclite_name_0.
 
 This repo provides a wrapper script `analyze_with_sclite.py`, which can be used to run `sclite` and format its output.
