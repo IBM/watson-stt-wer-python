@@ -119,8 +119,11 @@ class Analyzer:
         results['ser'].append(round(total_ser,2))
         results['words'].append(sum(results['words']))
         results['sentences'].append(sum(results['sentences']))
-        columns = {'configuration':'config', 'sub':'sub', 'del':'del', 'ins':'ins', 'wer':'wer', 'words':'#words', 'ser':'ser', 'sentences':'#sentences'}
+        columns = {'configuration':'config', 'sub':'Substitutions', 'del':'Deletions', 'ins':'Insertions', 'wer':'Word Error Rate', 'words':'Total Words', 'ser':'Sentence Error Rate', 'sentences':'Total Sentences'}
         df = pd.DataFrame.from_dict(results).rename(columns=columns)
+
+        df.to_json(os.path.dirname(stm_file)+"/sclite_wer_summary.json", orient="records")
+
         logging.info("\n"+df.to_markdown(index=False)) 
 
     def get_wer(self, sclite_str):
