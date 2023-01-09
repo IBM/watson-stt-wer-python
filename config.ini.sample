@@ -38,6 +38,8 @@ summary_file=output/wer_summary.json
 word_accuracy_file=output/wer_word_accuracy.csv
 ;JSON file with STT output
 stt_transcriptions_file=output/stt_transcriptions.csv
+;Directory where sclite is installed if sclite is to be used for Analysis
+;sclite_directory=
 
 [Transformations]
 remove_word_list=uh,uhuh,%hesitation,hesitation
