@@ -148,7 +148,7 @@ def run(config_file:str, logging_level:str=DEFAULT_LOGLEVEL):
     custom_model = str(config.getValue("SpeechToText", "language_model_id"))
     
     bias_range = drange(bias_min, bias_max+bias_step, bias_step)
-    weight_range = drange(cust_weight_min, cust_weight_max+cust_weight_step, cust_weight_step) if custom_model==None else drange(0.0, 0.1, 0.1)
+    weight_range = drange(cust_weight_min, cust_weight_max+cust_weight_step, cust_weight_step) if custom_model!=None else drange(0.0, 0.1, 0.1)
     sds_range = drange(sds_min, sds_max+sds_step, sds_step) 
     bas_range = drange(bas_min, bas_max+bas_step, bas_step)
     
