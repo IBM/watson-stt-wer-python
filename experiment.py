@@ -42,7 +42,7 @@ class Experiments:
 
                         logging.info(f"Running Experiment -- Character Insertion Bias: {bias}, Customization Weight: {weight}, Speech Detector Sensitivity: {sds}, Background Audio Suppression: {bas}")
 
-                        experiment_output_dir = self.output_dir + "/bias_" + str(bias) + "_weight" + str(weight) + "_sds" + str(sds) + "_bas" + str(bas)
+                        experiment_output_dir = self.output_dir + "/bias_" + str(bias) + "_weight_" + str(weight) + "_sds_" + str(sds) + "_bas_" + str(bas)
                         os.makedirs(experiment_output_dir, exist_ok=True)
 
                         exp_config_path = experiment_output_dir + "/" + self.config.config_file
