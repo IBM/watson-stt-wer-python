@@ -16,6 +16,7 @@ import pandas as pd
 
 import transcribe
 import analyze
+import optional_analyze_with_sclite
 
 DEFAULT_CONFIG_INI='config.ini'
 DEFAULT_LOGLEVEL='INFO'
@@ -41,7 +42,7 @@ class Experiments:
 
                         logging.info(f"Running Experiment -- Character Insertion Bias: {bias}, Customization Weight: {weight}, Speech Detector Sensitivity: {sds}, Background Audio Suppression: {bas}")
 
-                        experiment_output_dir = self.output_dir + "/" + str(bias) + "_" + str(weight) + "_" + str(sds) + "_" + str(bas)
+                        experiment_output_dir = self.output_dir + "/bias_" + str(bias) + "_weight_" + str(weight) + "_sds_" + str(sds) + "_bas_" + str(bas)
                         os.makedirs(experiment_output_dir, exist_ok=True)
 
                         exp_config_path = experiment_output_dir + "/" + self.config.config_file
@@ -83,31 +84,40 @@ class Experiments:
                         transcribe.run(exp_config_path, logging_level)
 
                         #Get Analysis
-                        analyze.run(exp_config_path, logging_level)
+                        if exp_config.getValue('ErrorRateOutput', 'sclite_directory') is None:
+                            analyze.run(exp_config_path, logging_level)
+                        else:
+                            optional_analyze_with_sclite.run(exp_config_path, logging_level)
 
                         logging.info(f"Experiment Complete \n")
-
-
-
 
     def run_report(self, output_dir, config):
         logging.debug(f"Generating summary report in {output_dir}")
 
         # Extract all summaries
-        wer_summary_filename = os.path.split(config.getValue("ErrorRateOutput", "summary_file"))[1]
-        summary_tuples = []
+        if config.getValue('ErrorRateOutput', 'sclite_directory') is None:
+            lines = True 
+            wer_summary_filename = os.path.split(config.getValue("ErrorRateOutput", "summary_file"))[1]
+        else:
+            lines = False
+            wer_summary_filename = 'sclite_wer_summary.json'
+            
         summary_files = glob.glob(f"{output_dir}/**/*{wer_summary_filename}")
-        for file in summary_files:
-            with open(file) as json_file:
-                summary_tuples.append(json.load(json_file))
 
-        # Open summary file for writing
         output_filename = output_dir + '/all_summaries.csv'
-        with open(output_filename, 'w') as data_file:
-            dict_writer = csv.DictWriter(data_file, fieldnames=summary_tuples[0].keys())
-            dict_writer.writeheader()
-            dict_writer.writerows(summary_tuples)
-            logging.info(f"Wrote consolidated summary to {output_filename}")
+
+        f = open(summary_files[0])
+        data = json.load(f)
+        df_all = pd.read_json(json.dumps(data), orient='records', lines=lines)
+
+        for file in summary_files[1:]:
+            f = open(file)
+            data = json.load(f)
+            df = pd.read_json(json.dumps(data), orient='records', lines=lines)
+            df_all = pd.concat([df_all, df], ignore_index=True)
+        
+        logging.info("\n"+df_all.to_markdown())
+        df_all.to_csv(output_filename, index=False)
 
 def drange(start, stop, step):
     r = start
@@ -125,9 +135,6 @@ def run(config_file:str, logging_level:str=DEFAULT_LOGLEVEL):
     output_dir = os.path.dirname(config.getValue("ErrorRateOutput", "summary_file"))
     if output_dir is None or len(output_dir) == 0:
         output_dir = "."
-    #print(output_dir)
-
-    #run_all_experiments(config_file, output_dir)
 
     # build generators
     experiments = Experiments(config, output_dir)

@@ -173,6 +173,8 @@ The following parameters in `[Experiments]` all have a `*_min` and `*_max` varia
 1. `cust_weight_*` controls the `customization_weight` parameter
 1. `bas_*` controls the `background_audio_suppression`parameter
 
+Note: If you want to use `sclite` for analysis of each experiment be sure to configure `sclite_directory` under the `[ErrorRateOutput]` section.
+
 ## Execution
 
 ```
@@ -182,7 +184,7 @@ python experiment.py --config_file config.ini --log_level INFO
 See [Generic Command Line Parameters](#generic-command-line-parameters) for more details.
 
 ## Results
-Each experiment creates a unique directory based on the parameters of that experiment in the format `bias + "_" + weight + "_" + sds + "_" + bas`.
+Each experiment creates a unique directory based on the parameters of that experiment in the format `bias_<bias-value>_weight_<customization-weight-value>_sds_<sds-value>_bas_<bas-value>`.
 
 For each experiment the output files from [Transcribing](#transcription) and [Analyzing](#analysis) will be created in its unique output directory. 
 

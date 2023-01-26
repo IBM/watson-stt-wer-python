@@ -30,7 +30,7 @@ class Analyzer:
         if transcriptions_filename is not None:
             try:
                 if os.path.exists(transcriptions_filename):
-                    logging.info(f"Attempting to create ctm file from transcriptions file - {transcriptions_filename}")
+                    logging.debug(f"Attempting to create ctm file from transcriptions file - {transcriptions_filename}")
                     transcriptions_df = pd.read_csv(transcriptions_filename)
                     transcriptions_df.sort_values(by="Audio File Name", inplace=True)
 
@@ -49,7 +49,7 @@ class Analyzer:
         if reference_file_name is not None:
             try:
                 if os.path.exists(reference_file_name):
-                    logging.info(f"Found reference transcriptions file - {reference_file_name} - attempting to create stm file")
+                    logging.debug(f"Found reference transcriptions file - {reference_file_name} - attempting to create stm file")
                     ref_df = pd.read_csv(reference_file_name)
                     ref_df = ref_df.sort_values(by = 'Audio File Name')
                     ref_df.insert(1,"num1",pd.Series([1 for x in range(len(ref_df.index))]))
@@ -64,7 +64,6 @@ class Analyzer:
                         new_lines.append(line.lstrip())
                     self.write_to_file(new_lines, stm_file)
                     logging.info(f"Created stm file - {stm_file}")
-
             except Exception as e:
                 logging.exception(f"Failed to create stm file {stm_file}:",e)
 
@@ -74,57 +73,37 @@ class Analyzer:
                 f.write(entry + "\n")
     
     def analyze(self, transcriptions_filename, sclite_path):
-        results = {'task':[], 'sub':[], 'del':[], 'ins':[], 'wer':[], 'ser':[], 'configuration':[], 'words':[], 'sentences':[]}
-        all = copy.deepcopy(results)
+        results = {'task':[], 'sub':[], 'del':[], 'ins':[], 'wer':[], 'ser':[], 'words':[], 'sentences':[]}
 
         stm_file = os.path.splitext(os.path.abspath(transcriptions_filename))[0]+".stm"
         ctm_file = os.path.splitext(os.path.abspath(transcriptions_filename))[0]+".ctm"
 
-        best_align = None
-        best_config = None
-
         result = subprocess.run([sclite_path+'/sclite', '-h', ctm_file, 'ctm', '-r', stm_file, 'stm', '-o', 'prf', 'dtl', 'sum'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         sclite_summary_file = ctm_file + '.sys'
 
-        with open(sclite_summary_file,'rt') as f:
-                    lines = f.readlines()
-                    for line in lines:
-                        if line.find("Sum") != -1:
-                            align = self.get_wer(line)
-                            all['task'].append(os.path.dirname(ctm_file))                           
-                            all['configuration'].append(os.path.basename(ctm_file))
-                            for cat in ('sub', 'del', 'ins', 'wer', 'words', 'ser', 'sentences'):
-                                all[cat].append(float(align[cat]))                            
-                            if best_align == None or align['wer'] < best_align['wer']:
-                                best_align = align
-                                best_config = os.path.basename(ctm_file)                                
-        results['task'].append(os.path.dirname(ctm_file))
-        results['configuration'].append(best_config)
-        for cat in ('sub', 'del', 'ins', 'wer', 'words', 'ser', 'sentences'):
-            results[cat].append(float(best_align[cat]))
+        logging.debug(result.stdout.decode('ascii'))
 
-        results = all
-        # calculate total wer
-        total_sub = sum([i*j for (i, j) in zip(results['words'], results['sub'])])/sum(results['words'])
-        total_del = sum([i*j for (i, j) in zip(results['words'], results['del'])])/sum(results['words'])
-        total_ins = sum([i*j for (i, j) in zip(results['words'], results['ins'])])/sum(results['words'])
-        total_wer = sum([i*j for (i, j) in zip(results['words'], results['wer'])])/sum(results['words'])
-        total_ser = sum([i*j for (i, j) in zip(results['sentences'], results['ser'])])/sum(results['sentences'])
-        results['task'].append('all')
-        results['configuration'].append('')
-        results['sub'].append(round(total_sub,2))
-        results['del'].append(round(total_del,2))
-        results['ins'].append(round(total_ins,2))
-        results['wer'].append(round(total_wer,2))
-        results['ser'].append(round(total_ser,2))
-        results['words'].append(sum(results['words']))
-        results['sentences'].append(sum(results['sentences']))
-        columns = {'configuration':'config', 'sub':'Substitutions', 'del':'Deletions', 'ins':'Insertions', 'wer':'Word Error Rate', 'words':'Total Words', 'ser':'Sentence Error Rate', 'sentences':'Total Sentences'}
+        try:
+            with open(sclite_summary_file,'rt') as f:
+                        lines = f.readlines()
+                        for line in lines:
+                            if line.find("Sum") != -1:
+                                align = self.get_wer(line)
+                                results['task'].append(os.path.basename(os.path.dirname(ctm_file)))                          
+                                for cat in ('sub', 'del', 'ins', 'wer', 'words', 'ser', 'sentences'):
+                                    results[cat].append(float(align[cat]))   
+        except Exception as e:
+            logging.exception(f"Could not open {sclite_summary_file}: ", exc_info=e)
+            exit() 
+        
+        columns = {'sub':'Substitutions', 'del':'Deletions', 'ins':'Insertions', 'wer':'Word Error Rate', 'words':'Total Words', 'ser':'Sentence Error Rate', 'sentences':'Total Sentences'}
         df = pd.DataFrame.from_dict(results).rename(columns=columns)
 
-        df.to_json(os.path.dirname(stm_file)+"/sclite_wer_summary.json", orient="records")
+        wer_summary_file=str(os.path.dirname(stm_file)+"/sclite_wer_summary.json")
+        df.to_json(wer_summary_file, orient="records")
+        logging.info(f"Created summary file - {wer_summary_file}")
 
-        logging.info("\n"+df.to_markdown(index=False)) 
+        logging.debug("\n"+df.to_markdown(index=False)) 
 
     def get_wer(self, sclite_str):
         #  "| Sum/Avg|  187    764 | 84.9   11.0    4.1    8.4   23.4   49.2 |"
