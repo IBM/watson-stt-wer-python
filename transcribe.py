@@ -135,7 +135,7 @@ class Transcriber:
             new_headers=self.STT.default_headers
             new_headers['X-Global-Transaction-Id']=transaction_id
             self.STT.set_default_headers(new_headers)
-            logging.deubg("--> Transaction ID:", self.STT.default_headers['X-Global-Transaction-Id'])
+            logging.debug("--> Transaction ID: " + self.STT.default_headers['X-Global-Transaction-Id'])
 
         #print(f"Requesting transcription of {filename}")
         with open(filename, "rb") as audio_file:
