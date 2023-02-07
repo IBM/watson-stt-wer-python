@@ -50,7 +50,7 @@ class Analyzer:
             try:
                 if os.path.exists(reference_file_name):
                     logging.debug(f"Found reference transcriptions file - {reference_file_name} - attempting to create stm file")
-                    ref_df = pd.read_csv(reference_file_name)
+                    ref_df = pd.read_csv(reference_file_name, usecols = ['Audio File Name','Reference'])
                     ref_df = ref_df.sort_values(by = 'Audio File Name')
                     ref_df.insert(1,"num1",pd.Series([1 for x in range(len(ref_df.index))]))
                     ref_df.insert(2,"num2",pd.Series([0 for x in range(len(ref_df.index))]))
