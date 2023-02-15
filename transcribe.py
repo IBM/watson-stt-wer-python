@@ -26,6 +26,8 @@ from uuid import uuid4
 DEFAULT_CONFIG_INI='config.ini'
 DEFAULT_LOGLEVEL='DEBUG'
 
+FILE_EXTENSIONS = ("mp3", "mpeg", "ogg", "wav", "webm", "opus")
+
 class Transcriptions:
     data = {}
 
@@ -221,21 +223,36 @@ def run(config_file:str, logging_level:str=DEFAULT_LOGLEVEL):
     if output_dir is not None and len(output_dir) > 0:
         os.makedirs(output_dir, exist_ok=True)
 
-    files = [audio_file_dir + "/" + f for f in os.listdir(audio_file_dir)]
+    files = []
+    skipped = []
+    for f in os.listdir(audio_file_dir):
+        if f.endswith(FILE_EXTENSIONS):
+            files.append(audio_file_dir + "/" + f)
+        else:
+            skipped.append(audio_file_dir + "/" + f)
+
+    if len(files) < len(os.listdir(audio_file_dir)):
+        logging.warning("Skipping files in the audio file directory due to invalid file extensions: " + str(skipped))
+
     total_files=len(files)
-    complete_files=0
-    with concurrent.futures.ThreadPoolExecutor(max_workers=max_threads) as executor:
-        #executor.map(transcriber.transcribe,files)
-        futures = [executor.submit(transcriber.transcribe, file) for file in files]
-        for future in concurrent.futures.as_completed(futures):
-            complete_files+=1
-            if complete_files%100==0:
-                logging.info(f"Completed transcribing {complete_files} files out of {total_files}")
+
+    if total_files>0:
+        complete_files=0
+        with concurrent.futures.ThreadPoolExecutor(max_workers=max_threads) as executor:
+            #executor.map(transcriber.transcribe,files)
+            futures = [executor.submit(transcriber.transcribe, file) for file in files]
+            for future in concurrent.futures.as_completed(futures):
+                complete_files+=1
+                if complete_files%100==0:
+                    logging.info(f"Completed transcribing {complete_files} files out of {total_files}")
     
-    if complete_files != total_files:
-        logging.error(f"Only {complete_files} out of {total_files} were transcribed.")
+        if complete_files != total_files:
+            logging.error(f"Only {complete_files} out of {total_files} were transcribed.")
+        else:
+            logging.info(f"Completed transcribing {complete_files} files out of {total_files}")
     else:
-        logging.info(f"Completed transcribing {complete_files} files out of {total_files}")
+        logging.error("There were no valid audio files found. Exiting.")
+        sys.exit(1)
 
     transcriber.report()
 
