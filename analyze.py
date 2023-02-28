@@ -111,7 +111,7 @@ class AnalysisResults:
     def write_details(self, filename):
         csv_columns = self.headers
 
-        with open(filename, 'w') as csvfile:
+        with open(filename, 'w',newline='') as csvfile:
             writer = csv.writer(csvfile)
             writer.writerow(csv_columns)
             for result in self.results:
@@ -129,7 +129,7 @@ class AnalysisResults:
     def write_word_accuracy(self, filename):
         csv_columns = ['word','count','errors','error_rate']
 
-        with open(filename, 'w') as csvfile:
+        with open(filename, 'w',newline='') as csvfile:
             writer = csv.DictWriter(csvfile, fieldnames=csv_columns)
             writer.writeheader()
             for word in self.word_map:
