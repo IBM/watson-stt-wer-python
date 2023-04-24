@@ -10,6 +10,7 @@ This readme describes the tools in depth.  For more information on use cases and
 * [New Speech Testing Utilities for Conversational AI Projects](https://medium.com/ibm-watson-speech-services/new-speech-testing-utilities-for-conversational-ai-projects-bf73debe19be): Describes recipe for using Text to Speech to "bootstrap" testing data
 * [Data Collection and Training for Speech Projects](https://medium.com/ibm-data-ai/data-collection-and-training-for-speech-projects-22004c3e84fb): How to collect test data from human voices.
 * [How to Train your Speech to Text Dragon](https://medium.com/ibm-watson/watson-speech-to-text-how-to-train-your-own-speech-dragon-part-1-data-collection-and-fdd8cea4f4b8)
+* [A mental model for Speech to Text training](https://medium.com/ibm-watson-speech-services/a-mental-model-for-speech-to-text-training-8c56a4105e25)
 
 You may also find useful:
 * [TTS-Python](https://github.com/IBM/watson-tts-python) - companion tooling for IBM Text to Speech
