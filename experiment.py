@@ -166,8 +166,6 @@ def run(config_file:str, logging_level:str=DEFAULT_LOGLEVEL):
     bas_range = drange(bas_min, bas_max+bas_step, bas_step)
     end_of_phrase_silence_time_range = drange(end_of_phrase_silence_time_min,end_of_phrase_silence_time_max+end_of_phrase_silence_time_step,end_of_phrase_silence_time_step)
     
-    print(sds_range)
-
     experiments.run_all_experiments(bias_range, weight_range, sds_range, bas_range, end_of_phrase_silence_time_range, max_threads, logging_level)
 
     experiments.run_report(output_dir, config)
