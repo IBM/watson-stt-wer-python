@@ -39,6 +39,7 @@ Update the `config.ini` file with:
     1. `bias_*` controls the `character_insertion_bias` parameter
     1. `cust_weight_*` controls the `customization_weight` parameter
     1. `bas_*` controls the `background_audio_suppression` parameter
+    1. `end_of_phrase_silence_time_*` controls the `end_of_phrase_silence_time_` parameter
     For example the following will iterate through `customization_weight` from `-0.3` to `0.3` at `0.1` increments, while keeping the other parameters static:
         ```
         [Experiments]
@@ -54,33 +55,36 @@ Update the `config.ini` file with:
         bas_min=0
         bas_max=0.0
         bas_step=0.1
+        end_of_phrase_silence_time_min=0
+        end_of_phrase_silence_time_max=0.0
+        end_of_phrase_silence_time_step=0.1
         ```
 
 Run the grid search
 ```
 python experiment.py --config_file config.ini --log_level INFO
 
-2023-04-24 17:01:00,341 - INFO - Running Experiment -- Character Insertion Bias: 0.0, Customization Weight: -0.3, Speech Detector Sensitivity: 0.7, Background Audio Suppression: 0.0
+2023-04-24 17:01:00,341 - INFO - Running Experiment -- Character Insertion Bias: 0.0, Customization Weight: -0.3, Speech Detector Sensitivity: 0.7, Background Audio Suppression: 0.0, End of Phrase Silence Time: 0.0
 2023-04-24 17:01:11,022 - INFO - Completed transcribing 4 files out of 4
-2023-04-24 17:01:11,023 - INFO - Wrote transcriptions for 4 audio files to ./sample-files/bias_0.0_weight_-0.3_sds_0.7_bas_0.0/stt_transcriptions.csv
-2023-04-24 17:01:11,030 - INFO - Updated ./sample-files/bias_0.0_weight_-0.3_sds_0.7_bas_0.0/stt_transcriptions.csv with reference transcriptions
-2023-04-24 17:01:11,033 - INFO - Created ctm file - ./sample-files/bias_0.0_weight_-0.3_sds_0.7_bas_0.0/stt_transcriptions.ctm
-2023-04-24 17:01:11,039 - INFO - Created stm file - ./sample-files/bias_0.0_weight_-0.3_sds_0.7_bas_0.0/stt_transcriptions.stm
-2023-04-24 17:01:11,058 - INFO - Created summary file - /Users/gecock/Desktop/watson-stt-wer-python-fork/watson-stt-wer-python/sample-files/bias_0.0_weight_-0.3_sds_0.7_bas_0.0/sclite_wer_summary.json
+2023-04-24 17:01:11,023 - INFO - Wrote transcriptions for 4 audio files to ./sample-files/bias_0.0_weight_-0.3_sds_0.7_bas_0.0_eofst_0.0/stt_transcriptions.csv
+2023-04-24 17:01:11,030 - INFO - Updated ./sample-files/bias_0.0_weight_-0.3_sds_0.7_bas_0.0_eofst_0.0/stt_transcriptions.csv with reference transcriptions
+2023-04-24 17:01:11,033 - INFO - Created ctm file - ./sample-files/bias_0.0_weight_-0.3_sds_0.7_bas_0.0_eofst_0.0/stt_transcriptions.ctm
+2023-04-24 17:01:11,039 - INFO - Created stm file - ./sample-files/bias_0.0_weight_-0.3_sds_0.7_bas_0.0_eofst_0.0/stt_transcriptions.stm
+2023-04-24 17:01:11,058 - INFO - Created summary file - /Users/gecock/Desktop/watson-stt-wer-python-fork/watson-stt-wer-python/sample-files/bias_0.0_weight_-0.3_sds_0.7_bas_0.0_eofst_0.0/sclite_wer_summary.json
 2023-04-24 17:01:11,065 - INFO - Experiment Complete 
 
-2023-04-24 17:01:11,065 - INFO - Running Experiment -- Character Insertion Bias: 0.0, Customization Weight: -0.2, Speech Detector Sensitivity: 0.7, Background Audio Suppression: 0.0
+2023-04-24 17:01:11,065 - INFO - Running Experiment -- Character Insertion Bias: 0.0, Customization Weight: -0.2, Speech Detector Sensitivity: 0.7, Background Audio Suppression: 0.0, End of Phrase Silence Time: 0.0
 2023-04-24 17:01:18,043 - INFO - Completed transcribing 4 files out of 4
 ...
-|    | task                                 |   Substitutions |   Deletions |   Insertions |   Word Error Rate |   Sentence Error Rate |   Total Words |   Total Sentences |
-|---:|:-------------------------------------|----------------:|------------:|-------------:|------------------:|----------------------:|--------------:|------------------:|
-|  0 | bias_0.0_weight_-0.3_sds_0.7_bas_0.0 |            66.7 |         0   |          0   |              66.7 |                 100   |             6 |                 3 |
-|  1 | bias_0.0_weight_-0.2_sds_0.7_bas_0.0 |            50   |         0   |          0   |              50   |                  66.7 |             6 |                 3 |
-|  2 | bias_0.0_weight_-0.1_sds_0.7_bas_0.0 |            50   |         0   |          0   |              50   |                  66.7 |             6 |                 3 |
-|  3 | bias_0.0_weight_0.0_sds_0.7_bas_0.0  |            50   |         0   |          0   |              50   |                  66.7 |             6 |                 3 |
-|  4 | bias_0.0_weight_0.1_sds_0.7_bas_0.0  |            33.3 |        16.7 |          0   |              50   |                  66.7 |             6 |                 3 |
-|  5 | bias_0.0_weight_0.2_sds_0.7_bas_0.0  |            33.3 |        16.7 |          0   |              50   |                  66.7 |             6 |                 3 |
-|  6 | bias_0.0_weight_0.3_sds_0.7_bas_0.0  |            33.3 |        16.7 |          0   |              50   |                  66.7 |             6 |                 3 |
+|    | task                                           |   Substitutions |   Deletions |   Insertions |   Word Error Rate |   Sentence Error Rate |   Total Words |   Total Sentences |
+|---:|:-----------------------------------------------|----------------:|------------:|-------------:|------------------:|----------------------:|--------------:|------------------:|
+|  0 | bias_0.0_weight_-0.3_sds_0.7_bas_0.0_eofst_0.0 |            66.7 |         0   |          0   |              66.7 |                 100   |             6 |                 3 |
+|  1 | bias_0.0_weight_-0.2_sds_0.7_bas_0.0_eofst_0.0 |            50   |         0   |          0   |              50   |                  66.7 |             6 |                 3 |
+|  2 | bias_0.0_weight_-0.1_sds_0.7_bas_0.0_eofst_0.0 |            50   |         0   |          0   |              50   |                  66.7 |             6 |                 3 |
+|  3 | bias_0.0_weight_0.0_sds_0.7_bas_0.0_eofst_0.0  |            50   |         0   |          0   |              50   |                  66.7 |             6 |                 3 |
+|  4 | bias_0.0_weight_0.1_sds_0.7_bas_0.0_eofst_0.0  |            33.3 |        16.7 |          0   |              50   |                  66.7 |             6 |                 3 |
+|  5 | bias_0.0_weight_0.2_sds_0.7_bas_0.0_eofst_0.0  |            33.3 |        16.7 |          0   |              50   |                  66.7 |             6 |                 3 |
+|  6 | bias_0.0_weight_0.3_sds_0.7_bas_0.0_eofst_0.0  |            33.3 |        16.7 |          0   |              50   |                  66.7 |             6 |                 3 |
 ```
 
 View the results in the file `all_summaries.csv` to see a concise view of all iterations, or, view the details of each iteration by looking at the set of directories created in the format `bias_<bias-value>_weight_<customization-weight-value>_sds_<sds-value>_bas_<bas-value>`
