@@ -172,6 +172,7 @@ The following parameters in `[Experiments]` all have a `*_min` and `*_max` varia
 1. `bias_*` controls the `character_insertion_bias` parameter
 1. `cust_weight_*` controls the `customization_weight` parameter
 1. `bas_*` controls the `background_audio_suppression`parameter
+1. `end_of_phrase_silence_time_*` controls the `end_of_phrase_silence_time_` parameter
 
 Note: If you want to use `sclite` for analysis of each experiment be sure to configure `sclite_directory` under the `[ErrorRateOutput]` section.
 
