@@ -48,12 +48,22 @@ class MyRecognizeCallback(RecognizeCallback):
 
     def on_data(self, data):
         #print(json.dumps(data, indent=2))
+        # if self.audio_file_name not in self.transcriptions.getData():
+        #     transcription = ""
+        # else:
+        #     print(self.transcriptions.getData()[self.audio_file_name])
+            
         try:
             transcription = ""
             for result in data['results']:
                 transcription += result["alternatives"][0]["transcript"]
-            #print(transcription)
-            self.transcriptions.add(self.audio_file_name, transcription)
+                #print(result["final"],"\n\n\n")
+            # print(self.audio_file_name + " -- " + transcription+"\n\n")
+            if self.audio_file_name not in self.transcriptions.getData():
+                self.transcriptions.add(self.audio_file_name, transcription)
+            else:
+                transcription = self.transcriptions.getData()[self.audio_file_name]+ " " + transcription
+                self.transcriptions.add(self.audio_file_name, transcription)
         except:
             logging.exception(f"{self.audio_file_name} - No transcription found")
 
