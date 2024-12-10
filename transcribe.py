@@ -45,6 +45,7 @@ class MyRecognizeCallback(RecognizeCallback):
         RecognizeCallback.__init__(self)
         self.audio_file_name = audio_file_name
         self.transcriptions = transcriptions
+        logging.debug("initialized object")
 
     def on_data(self, data):
         #print(json.dumps(data, indent=2))
@@ -59,6 +60,7 @@ class MyRecognizeCallback(RecognizeCallback):
 
     def on_error(self, error):
         logging.error(f'{self.audio_file_name} - Recognize Error received: {error}')
+        logging.exception(f"Error transcribing {self.audio_file_name}:",exc_info=error)
 
     def on_inactivity_timeout(self, error):
         logging.error(f'{self.audio_file_name} - Inactivity timeout: {error}')
@@ -117,6 +119,7 @@ class Transcriber:
         speech_detector_sensitivity  = float(self.config.getValue("SpeechToText", "speech_detector_sensitivity"))
         background_audio_suppression = float(self.config.getValue("SpeechToText", "background_audio_suppression"))
         character_insertion_bias     = float(self.config.getValue("SpeechToText", "character_insertion_bias", 0.0))
+        smart_formatting_version     =   int(self.config.getValue  ("SpeechToText", "smart_formatting_version", 0))
         if language_customization_id is not None:
             customization_weight         = float(self.config.getValue("SpeechToText", "customization_weight"))
         else:
@@ -154,6 +157,7 @@ class Transcriber:
                     speech_detector_sensitivity=speech_detector_sensitivity,
                     background_audio_suppression=background_audio_suppression,
                     smart_formatting=smart_formatting,
+                    smart_formatting_version=smart_formatting_version,
                     low_latency=low_latency,
                     skip_zero_len_words=skip_zero_len_words,
                     character_insertion_bias=character_insertion_bias,
