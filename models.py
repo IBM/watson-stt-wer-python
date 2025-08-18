@@ -30,10 +30,13 @@ class ModelTool:
 
     def createSTT(self):
         apikey            = self.config.getValue("SpeechToText", "apikey")
+        bearer_token      = self.config.getValue("SpeechToText", "bearer_token", None)
         url               = self.config.getValue("SpeechToText", "service_url")
         use_bearer_token  = self.config.getBoolean("SpeechToText", "use_bearer_token")
 
-        if use_bearer_token != True:
+        if bearer_token != None:
+            authenticator      = BearerTokenAuthenticator(bearer_token)
+        elif use_bearer_token != True:
             authenticator = IAMAuthenticator(apikey)
         else:
             iam_token_manager = IAMTokenManager(apikey=apikey)
