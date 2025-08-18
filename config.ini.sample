@@ -1,6 +1,9 @@
 [SpeechToText]
 apikey=xxxxxxxxx-xxxxx-xxxxx-xxxxxxxxxxx # pragma: allowlist secret
+#add key 'bearer_token' if you have a bearer token directly, instead of using 'apikey'
 service_url=https://....
+#use_bearer_token=False is for IBM cloud, uses apikey as an apikey
+#use_bearer_token=True is for Cloud Pak installs, instructs tool to use apikey to fetch a bearer_token
 use_bearer_token=False
 
 ;max_threads=20
