@@ -7,10 +7,8 @@ import time
 from config import Config
 
 from ibm_watson import SpeechToTextV1
-from ibm_cloud_sdk_core.authenticators import IAMAuthenticator
-from ibm_watson import IAMTokenManager
-from ibm_cloud_sdk_core.authenticators import BearerTokenAuthenticator
 from ibm_watson.speech_to_text_v1 import CustomWord
+from auth import create_stt_service
 
 from argparse import ArgumentParser
 
@@ -25,29 +23,8 @@ class ModelTool:
 
     def __init__(self, config, ARGS):
         self.config = config
-        self.STT = self.createSTT()
+        self.STT = create_stt_service(config)
         self.ARGS = ARGS
-
-    def createSTT(self):
-        apikey            = self.config.getValue("SpeechToText", "apikey")
-        bearer_token      = self.config.getValue("SpeechToText", "bearer_token", None)
-        url               = self.config.getValue("SpeechToText", "service_url")
-        use_bearer_token  = self.config.getBoolean("SpeechToText", "use_bearer_token")
-
-        if bearer_token != None:
-            authenticator      = BearerTokenAuthenticator(bearer_token)
-        elif use_bearer_token != True:
-            authenticator = IAMAuthenticator(apikey)
-        else:
-            iam_token_manager = IAMTokenManager(apikey=apikey)
-            bearerToken       = iam_token_manager.get_token()
-            authenticator     = BearerTokenAuthenticator(bearerToken)
-
-        speech_to_text = SpeechToTextV1(authenticator=authenticator)
-
-        speech_to_text.set_service_url(url)
-        speech_to_text.set_default_headers({'x-watson-learning-opt-out': "true"})
-        return speech_to_text
 
     def execute(self):
         # eprint(f"operation: {self.ARGS.operation}\n"

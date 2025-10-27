@@ -7,14 +7,13 @@ import re
 import csv
 import concurrent.futures
 import threading
+from typing import Dict, List, Optional, Any
 from config import Config
 import logging
 
 from ibm_watson import SpeechToTextV1
-from ibm_cloud_sdk_core.authenticators import IAMAuthenticator
-from ibm_watson import IAMTokenManager
-from ibm_cloud_sdk_core.authenticators import BearerTokenAuthenticator
 from ibm_watson.websocket import RecognizeCallback, AudioSource
+from auth import create_stt_service
 
 import os.path
 from os import path
@@ -29,23 +28,41 @@ DEFAULT_LOGLEVEL='DEBUG'
 FILE_EXTENSIONS = ("mp3", "mpeg", "ogg", "wav", "webm", "opus")
 
 class Transcriptions:
-    data = {}
+    """
+    Class to store and manage transcription results.
+    """
+    def __init__(self):
+        self.data: Dict[str, str] = {}
 
-    def add(self, transcriptionKey:str, transcriptionValue:str):
+    def add(self, transcriptionKey: str, transcriptionValue: str) -> None:
+        """
+        Add a transcription result.
+
+        Args:
+            transcriptionKey: Audio file name
+            transcriptionValue: Transcription text
+        """
         self.data[transcriptionKey] = transcriptionValue
 
-    def getData(self):
+    def getData(self) -> Dict[str, str]:
+        """
+        Get all transcription results.
+
+        Returns:
+            Dict mapping audio file names to transcriptions
+        """
         return self.data
 
 class MyRecognizeCallback(RecognizeCallback):
-    audio_file_name = None
-    transcriptions = None
+    """
+    Callback handler for Watson STT websocket recognition.
+    """
 
-    def __init__(self, audio_file_name:str, transcriptions:Transcriptions):
+    def __init__(self, audio_file_name: str, transcriptions: Transcriptions):
         RecognizeCallback.__init__(self)
-        self.audio_file_name = audio_file_name
-        self.transcriptions = transcriptions
-        logging.debug("initialized object")
+        self.audio_file_name: str = audio_file_name
+        self.transcriptions: Transcriptions = transcriptions
+        logging.debug(f"Initialized callback for {audio_file_name}")
 
     def on_data(self, data):
         #print(json.dumps(data, indent=2))
@@ -55,8 +72,10 @@ class MyRecognizeCallback(RecognizeCallback):
                 transcription += result["alternatives"][0]["transcript"]
             #print(transcription)
             self.transcriptions.add(self.audio_file_name, transcription)
-        except:
-            logging.exception(f"{self.audio_file_name} - No transcription found")
+        except KeyError as e:
+            logging.exception(f"{self.audio_file_name} - Missing key(s) in transcription data: {e}")
+        except Exception as e:
+            logging.exception(f"{self.audio_file_name} - Error processing transcription: {e}")
 
     def on_error(self, error):
         logging.error(f'{self.audio_file_name} - Recognize Error received: {error}')
@@ -69,7 +88,7 @@ class Transcriber:
 
     def __init__(self, config):
         self.config = config
-        self.STT = self.createSTT()
+        self.STT = create_stt_service(config)
         self.transcriptions = Transcriptions()
         self.audio_types = {}
         self.audio_types["wav"]  = "audio/wav"
@@ -79,32 +98,12 @@ class Transcriber:
         self.audio_types["webm"]  = "audio/webm"
         self.audio_types["opus"]  = "audio/webm"
 
-    def createSTT(self):
-        apikey            = self.config.getValue("SpeechToText", "apikey")
-        bearer_token      = self.config.getValue("SpeechToText", "bearer_token", None)
-        url               = self.config.getValue("SpeechToText", "service_url")
-        use_bearer_token  = self.config.getBoolean("SpeechToText", "use_bearer_token")
-
-        if bearer_token != None:
-            authenticator      = BearerTokenAuthenticator(bearer_token)
-        elif use_bearer_token != True:
-            authenticator = IAMAuthenticator(apikey)
-        else:
-            iam_token_manager = IAMTokenManager(apikey=apikey)
-            bearerToken       = iam_token_manager.get_token()
-            authenticator     = BearerTokenAuthenticator(bearerToken)
-
-        speech_to_text = SpeechToTextV1(authenticator=authenticator)
-
-        speech_to_text.set_service_url(url)
-        speech_to_text.set_default_headers({'x-watson-learning-opt-out': "true"})
-        return speech_to_text
-
-    def getAudioType(self, file:str):
+    def getAudioType(self, file: str) -> Optional[str]:
         try:
             filetype = file.lower().split(".")[-1]
             return self.audio_types.get(filetype, None)
-        except:
+        except (IndexError, AttributeError) as e:
+            logging.debug(f"Error determining audio type for {file}: {e}")
             return None
 
     def transcribe(self, filename):
@@ -139,11 +138,11 @@ class Transcriber:
         callback = MyRecognizeCallback(filename, self.transcriptions)
 
         if custom_transaction_id:
-            transaction_id=str("{}".format(datetime.now().strftime('%Y%m-%d%H-%M%S-') + str(uuid4())))
-            new_headers=self.STT.default_headers
-            new_headers['X-Global-Transaction-Id']=transaction_id
+            transaction_id = str("{}".format(datetime.now().strftime('%Y%m-%d%H-%M%S-') + str(uuid4())))
+            new_headers = self.STT.default_headers.copy() if self.STT.default_headers else {}
+            new_headers['X-Global-Transaction-Id'] = transaction_id
             self.STT.set_default_headers(new_headers)
-            logging.debug("--> Transaction ID: " + self.STT.default_headers['X-Global-Transaction-Id'])
+            logging.debug(f"--> Transaction ID: {transaction_id}")
 
         #print(f"Requesting transcription of {filename}")
         with open(filename, "rb") as audio_file:
@@ -171,7 +170,7 @@ class Transcriber:
                 )
                 #print(f"Requested transcription of {filename}")
             except Exception as e:
-                logging.exception(f"Error transcribing {filename}:",exc_info=e)
+                logging.exception(f"Error transcribing {filename}: {str(e)}")
 
     def report(self):
         report_file_name = self.config.getValue("Transcriptions", "stt_transcriptions_file")
@@ -212,8 +211,10 @@ class Transcriber:
 
                         comparison_result.to_csv(report_file_name, index=False)
                         logging.info(f"Updated {report_file_name} with reference transcriptions")
+            except (FileNotFoundError, pd.errors.EmptyDataError) as e:
+                logging.warning(f"Failed to read reference transcriptions file: {e}")
             except Exception as e:
-                logging.warning(f"Failed to merge reference transcriptions into {report_file_name}:", exc_info=e)
+                logging.warning(f"Failed to merge reference transcriptions into {report_file_name}: {str(e)}")
                 
 def run(config_file:str, logging_level:str=DEFAULT_LOGLEVEL):
     config      = Config(config_file)
@@ -223,20 +224,21 @@ def run(config_file:str, logging_level:str=DEFAULT_LOGLEVEL):
 
     logging.debug(f"Using config file:{config_file}")
 
-    audio_file_dir    = config.getValue("Transcriptions","audio_file_folder")
-    max_threads   = int(config.getValue("SpeechToText","max_threads", 1))
+    audio_file_dir = config.getValue("Transcriptions","audio_file_folder") or ""
+    max_threads = int(config.getValue("SpeechToText","max_threads", 1) or 1)
 
-    output_dir = os.path.dirname(config.getValue("ErrorRateOutput", "summary_file"))
-    if output_dir is not None and len(output_dir) > 0:
+    summary_file = config.getValue("ErrorRateOutput", "summary_file") or ""
+    output_dir = os.path.dirname(summary_file) if summary_file else ""
+    if output_dir and len(output_dir) > 0:
         os.makedirs(output_dir, exist_ok=True)
 
     files = []
     skipped = []
     for f in os.listdir(audio_file_dir):
         if f.endswith(FILE_EXTENSIONS):
-            files.append(audio_file_dir + "/" + f)
+            files.append(os.path.join(audio_file_dir, f))
         else:
-            skipped.append(audio_file_dir + "/" + f)
+            skipped.append(os.path.join(audio_file_dir, f))
 
     if len(files) < len(os.listdir(audio_file_dir)):
         logging.warning("Skipping files in the audio file directory due to invalid file extensions: " + str(skipped))

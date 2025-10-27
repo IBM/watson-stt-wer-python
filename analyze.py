@@ -16,6 +16,7 @@ import csv
 import logging
 from shutil import copyfile
 from os.path import join, dirname
+from typing import Dict, List, Optional, Any
 from config import Config
 import nltk
 from nltk.stem.porter import PorterStemmer
@@ -142,16 +143,24 @@ class Analyzer:
         self.config = config
         self.transformation = self.get_pipeline()
 
-    def load_csv(self, filename:str, headers:list):
+    def load_csv(self, filename: str, headers: list) -> Dict[str, str]:
         result = {}
-        # https://stackoverflow.com/questions/57152985/what-is-the-difference-between-utf-8-and-utf-8-sig
-        # utf-8-sig so we can ignore the BOM (Byte Order Marker)
-        with open(filename, encoding='utf-8-sig') as file:
-            csvreader = csv.DictReader(file)
-            for row in csvreader:
-                key = row[headers[0]]
-                value = row[headers[1]]
-                result[key] = value
+        try:
+            # https://stackoverflow.com/questions/57152985/what-is-the-difference-between-utf-8-and-utf-8-sig
+            # utf-8-sig so we can ignore the BOM (Byte Order Marker)
+            with open(filename, encoding='utf-8-sig') as file:
+                csvreader = csv.DictReader(file)
+                for row in csvreader:
+                    try:
+                        key = row[headers[0]]
+                        value = row[headers[1]]
+                        result[key] = value
+                    except KeyError as e:
+                        logging.error(f"Missing required column in CSV: {e}")
+        except FileNotFoundError:
+            logging.error(f"File not found: {filename}")
+        except Exception as e:
+            logging.error(f"Error reading CSV file {filename}: {str(e)}")
         return result
 
     def get_pipeline(self):
@@ -191,36 +200,71 @@ class Analyzer:
 
 
     def analyze(self):
-        reference_file   = self.config.getValue("Transcriptions","reference_transcriptions_file")
-        hypothesis_file  = self.config.getValue("Transcriptions","stt_transcriptions_file")
-        reference_dict   = self.load_csv(reference_file, ["Audio File Name", "Reference"])
-        hypothesis_dict  = self.load_csv(hypothesis_file,["Audio File Name", "Transcription"])
+        try:
+            # Validate required configuration
+            reference_file = self.config.getValue("Transcriptions", "reference_transcriptions_file")
+            hypothesis_file = self.config.getValue("Transcriptions", "stt_transcriptions_file")
+            
+            if not reference_file:
+                logging.error("Missing required configuration: reference_transcriptions_file")
+                return AnalysisResults(self.config)
+                
+            if not hypothesis_file:
+                logging.error("Missing required configuration: stt_transcriptions_file")
+                return AnalysisResults(self.config)
+                
+            # Validate file existence
+            if not os.path.exists(reference_file):
+                logging.error(f"Reference file does not exist: {reference_file}")
+                return AnalysisResults(self.config)
+                
+            if not os.path.exists(hypothesis_file):
+                logging.error(f"Hypothesis file does not exist: {hypothesis_file}")
+                return AnalysisResults(self.config)
+                
+            reference_dict = self.load_csv(reference_file, ["Audio File Name", "Reference"])
+            hypothesis_dict = self.load_csv(hypothesis_file, ["Audio File Name", "Transcription"])
+            
+            # Validate that we have data to process
+            if not reference_dict:
+                logging.error(f"No reference data found in {reference_file}")
+                return AnalysisResults(self.config)
+                
+            if not hypothesis_dict:
+                logging.error(f"No hypothesis data found in {hypothesis_file}")
+                return AnalysisResults(self.config)
 
-        results = AnalysisResults(self.config)
-        p_stemmer = PorterStemmer()
+            results = AnalysisResults(self.config)
+            p_stemmer = PorterStemmer()
 
-        for audio_file_name in reference_dict.keys():
-            reference = reference_dict.get(audio_file_name)
-            hypothesis   = hypothesis_dict.get(audio_file_name, None)
+            for audio_file_name in reference_dict.keys():
+                try:
+                    reference = reference_dict.get(audio_file_name)
+                    hypothesis = hypothesis_dict.get(audio_file_name, None)
 
-            if hypothesis is None:
-                logging.warn(f"{audio_file_name} - No hypothesis transcription found", sys.stderr)
-                continue
+                    if hypothesis is None:
+                        logging.warning(f"{audio_file_name} - No hypothesis transcription found")
+                        continue
 
-            # Common pre-processing on ground truth and hypothesis
-            cleaned_ref = self.transformation(reference)
-            cleaned_hyp = self.transformation(hypothesis)
+                    # Common pre-processing on ground truth and hypothesis
+                    cleaned_ref = self.transformation(reference)
+                    cleaned_hyp = self.transformation(hypothesis)
 
-            if self.config.getBoolean("Transformations", "stemming"):
-                cleaned_ref = [p_stemmer.stem(word) for word in cleaned_ref]
-                cleaned_hyp = [p_stemmer.stem(word) for word in cleaned_hyp]
+                    if self.config.getBoolean("Transformations", "stemming"):
+                        cleaned_ref = [p_stemmer.stem(word) for word in cleaned_ref]
+                        cleaned_hyp = [p_stemmer.stem(word) for word in cleaned_hyp]
 
-            # gather all metrics at once with `compute_measures`
-            measures = jiwer.compute_measures(cleaned_ref, cleaned_hyp)
-            differences = self.compute_differences(cleaned_ref, cleaned_hyp)
+                    # gather all metrics at once with `compute_measures`
+                    measures = jiwer.compute_measures(cleaned_ref, cleaned_hyp)
+                    differences = self.compute_differences(cleaned_ref, cleaned_hyp)
 
-            result = AnalysisResult(audio_file_name, reference, hypothesis, " ".join(cleaned_ref), " ".join(cleaned_hyp), measures, differences)
-            results.add(result)
+                    result = AnalysisResult(audio_file_name, reference, hypothesis, " ".join(cleaned_ref), " ".join(cleaned_hyp), measures, differences)
+                    results.add(result)
+                except Exception as e:
+                    logging.error(f"Error analyzing file {audio_file_name}: {str(e)}")
+        except Exception as e:
+            logging.error(f"Error in analysis process: {str(e)}")
+            return AnalysisResults(self.config)
 
         return results
 
@@ -239,21 +283,36 @@ class Analyzer:
         return differences
 
 def run(config_file:str, logging_level:str=DEFAULT_LOGLEVEL):
-    config      = Config(config_file)
-    analyzer    = Analyzer(config)
+    try:
+        logging.basicConfig(level=logging_level, format='%(asctime)s - %(levelname)s - %(message)s')
+        logging.debug(f"Using config file: {config_file}")
+        
+        config = Config(config_file)
+        analyzer = Analyzer(config)
 
-    logging.basicConfig(level=logging_level, format='%(asctime)s - %(levelname)s - %(message)s')
+        summary_file = config.getValue("ErrorRateOutput", "summary_file") or ""
+        output_dir = os.path.dirname(summary_file) if summary_file else ""
+        if output_dir and len(output_dir) > 0:
+            try:
+                os.makedirs(output_dir, exist_ok=True)
+            except OSError as e:
+                logging.error(f"Failed to create output directory {output_dir}: {str(e)}")
+                return
 
-    logging.debug(f"Using config file:{config_file}")
-
-    output_dir = os.path.dirname(config.getValue("ErrorRateOutput", "summary_file"))
-    if output_dir is not None and len(output_dir) > 0:
-        os.makedirs(output_dir, exist_ok=True)
-
-    results = analyzer.analyze()
-    results.write_details(config.getValue("ErrorRateOutput","details_file"))
-    results.write_summary(config.getValue("ErrorRateOutput","summary_file"))
-    results.write_word_accuracy(config.getValue("ErrorRateOutput","word_accuracy_file"))
+        results = analyzer.analyze()
+        
+        details_file = config.getValue("ErrorRateOutput", "details_file")
+        if details_file:
+            results.write_details(details_file)
+            
+        if summary_file:
+            results.write_summary(summary_file)
+            
+        word_accuracy_file = config.getValue("ErrorRateOutput", "word_accuracy_file")
+        if word_accuracy_file:
+            results.write_word_accuracy(word_accuracy_file)
+    except Exception as e:
+        logging.error(f"Unhandled exception in run: {str(e)}")
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.ArgumentDefaultsHelpFormatter)
