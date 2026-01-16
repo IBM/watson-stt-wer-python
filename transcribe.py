@@ -122,11 +122,11 @@ class Transcriber:
         background_audio_suppression = float(self.config.getValue("SpeechToText", "background_audio_suppression"))
         character_insertion_bias     = float(self.config.getValue("SpeechToText", "character_insertion_bias", 0.0))
         smart_formatting_version     =   int(self.config.getValue  ("SpeechToText", "smart_formatting_version", 0))
+        sad_module           =   int(self.config.getValue  ("SpeechToText", "sad_module", 1))
         if language_customization_id is not None:
-            customization_weight         = float(self.config.getValue("SpeechToText", "customization_weight"))
+            customization_weight         = float(self.config.getValue("SpeechToText", "customization_weight", 0.1))
         else:
             customization_weight = None
-
         #Boolean configs
         interim_results              = self.config.getBoolean("SpeechToText", "interim_results")
         audio_metrics                = self.config.getBoolean("SpeechToText", "audio_metrics")
@@ -158,6 +158,7 @@ class Transcriber:
                     inactivity_timeout=inactivity_timeout,
                     speech_detector_sensitivity=speech_detector_sensitivity,
                     background_audio_suppression=background_audio_suppression,
+                    sad_module=sad_module,
                     smart_formatting=smart_formatting,
                     smart_formatting_version=smart_formatting_version,
                     low_latency=low_latency,
