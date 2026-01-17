@@ -206,9 +206,60 @@ class Transcriber:
                     if not missing_columns:
                         file2_df = file2_df[["Audio File Name", "Reference"]]
 
-                        # Perform outer join merge
-                        comparison_result = pd.merge(file1_df,file2_df, on='Audio File Name', how='outer')
-                        #print(comparison_result)
+                        # Normalize filenames for matching (use basename to handle path differences)
+                        file1_df['_match_key'] = file1_df['Audio File Name'].apply(os.path.basename)
+                        file2_df['_match_key'] = file2_df['Audio File Name'].apply(os.path.basename)
+                        
+                        # Track original counts for validation
+                        transcription_count = len(file1_df)
+                        reference_count = len(file2_df)
+                        
+                        # Perform merge on normalized basename
+                        comparison_result = pd.merge(
+                            file1_df, file2_df,
+                            on='_match_key',
+                            how='outer',
+                            suffixes=('', '_ref')
+                        )
+                        
+                        # Consolidate Audio File Name column (prefer transcription path, fallback to reference)
+                        comparison_result['Audio File Name'] = comparison_result['Audio File Name'].fillna(
+                            comparison_result['Audio File Name_ref']
+                        )
+                        
+                        # Clean up temporary columns
+                        comparison_result = comparison_result.drop(['_match_key', 'Audio File Name_ref'], axis=1)
+                        
+                        # Reorder columns to standard format
+                        comparison_result = comparison_result[['Audio File Name', 'Transcription', 'Reference']]
+                        
+                        # Validation and warning system
+                        merged_count = len(comparison_result)
+                        missing_transcription = comparison_result['Transcription'].isna().sum()
+                        missing_reference = comparison_result['Reference'].isna().sum()
+                        successful_matches = merged_count - missing_transcription - missing_reference
+                        
+                        logging.info(f"Merge summary: {successful_matches} successful matches, "
+                                    f"{missing_reference} transcriptions without reference, "
+                                    f"{missing_transcription} references without transcription")
+                        
+                        if missing_transcription > 0 or missing_reference > 0:
+                            logging.warning(
+                                f"Filename matching issues detected! "
+                                f"Expected {reference_count} references and {transcription_count} transcriptions, "
+                                f"but only {successful_matches} matched successfully."
+                            )
+                            
+                            # Log specific unmatched files for debugging
+                            if missing_transcription > 0:
+                                unmatched_refs = comparison_result[comparison_result['Transcription'].isna()]['Audio File Name'].tolist()
+                                logging.warning(f"Reference files without transcription ({len(unmatched_refs)}): {unmatched_refs[:5]}" +
+                                              (f" ... and {len(unmatched_refs)-5} more" if len(unmatched_refs) > 5 else ""))
+                            
+                            if missing_reference > 0:
+                                unmatched_trans = comparison_result[comparison_result['Reference'].isna()]['Audio File Name'].tolist()
+                                logging.warning(f"Transcription files without reference ({len(unmatched_trans)}): {unmatched_trans[:5]}" +
+                                              (f" ... and {len(unmatched_trans)-5} more" if len(unmatched_trans) > 5 else ""))
 
                         comparison_result.to_csv(report_file_name, index=False)
                         logging.info(f"Updated {report_file_name} with reference transcriptions")
