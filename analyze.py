@@ -221,9 +221,33 @@ class Analyzer:
             if not os.path.exists(hypothesis_file):
                 logging.error(f"Hypothesis file does not exist: {hypothesis_file}")
                 return AnalysisResults(self.config)
-                
-            reference_dict = self.load_csv(reference_file, ["Audio File Name", "Reference"])
-            hypothesis_dict = self.load_csv(hypothesis_file, ["Audio File Name", "Transcription"])
+            
+            # Check if hypothesis file has Reference column - if so, use it for both
+            hypothesis_dict = {}
+            reference_dict = {}
+            
+            try:
+                with open(hypothesis_file, encoding='utf-8-sig') as file:
+                    csvreader = csv.DictReader(file)
+                    has_reference_column = csvreader.fieldnames and "Reference" in csvreader.fieldnames
+                    
+                    if has_reference_column:
+                        logging.debug(f"Transcription file has Reference column - loading both from {hypothesis_file}")
+                        reference_dict = self.load_csv(hypothesis_file, ["Audio File Name", "Reference"])
+                        hypothesis_dict = self.load_csv(hypothesis_file, ["Audio File Name", "Transcription"])
+
+                    else:
+                        # No Reference column, load transcription only
+                        logging.debug(f"Loading transcription from {hypothesis_file}")
+                        hypothesis_dict = self.load_csv(hypothesis_file, ["Audio File Name", "Transcription"])
+                        
+                        # Load reference from separate file
+                        logging.debug(f"Loading reference from {reference_file}")
+                        reference_dict = self.load_csv(reference_file, ["Audio File Name", "Reference"])
+                        
+            except Exception as e:
+                logging.error(f"Error reading hypothesis file {hypothesis_file}: {str(e)}")
+                return AnalysisResults(self.config)
             
             # Validate that we have data to process
             if not reference_dict:
