@@ -232,21 +232,14 @@ class Analyzer:
                     has_reference_column = csvreader.fieldnames and "Reference" in csvreader.fieldnames
                     
                     if has_reference_column:
-                        logging.info(f"Transcription file has Reference column - loading both from {hypothesis_file}")
-                        for row in csvreader:
-                            key = row.get("Audio File Name")
-                            if key:
-                                if row.get("Transcription"):
-                                    hypothesis_dict[key] = row["Transcription"]
-                                if row.get("Reference"):
-                                    reference_dict[key] = row["Reference"]
+                        logging.debug(f"Transcription file has Reference column - loading both from {hypothesis_file}")
+                        reference_dict = self.load_csv(hypothesis_file, ["Audio File Name", "Reference"])
+                        hypothesis_dict = self.load_csv(hypothesis_file, ["Audio File Name", "Transcription"])
+
                     else:
                         # No Reference column, load transcription only
                         logging.debug(f"Loading transcription from {hypothesis_file}")
-                        for row in csvreader:
-                            key = row.get("Audio File Name")
-                            if key and row.get("Transcription"):
-                                hypothesis_dict[key] = row["Transcription"]
+                        hypothesis_dict = self.load_csv(hypothesis_file, ["Audio File Name", "Transcription"])
                         
                         # Load reference from separate file
                         logging.debug(f"Loading reference from {reference_file}")
