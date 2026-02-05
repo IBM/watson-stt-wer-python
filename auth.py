@@ -23,12 +23,13 @@ def create_stt_service(config) -> SpeechToTextV1:
     bearer_token = config.getValue("SpeechToText", "bearer_token", None)
     url = config.getValue("SpeechToText", "service_url")
     use_bearer_token = config.getBoolean("SpeechToText", "use_bearer_token")
+    iam_url = config.getValue("SpeechToText", "iam_url", "https://iam.cloud.ibm.com/identity/token") #ibm cloud
 
     # Determine which authentication method to use
     if bearer_token is not None:
         authenticator = BearerTokenAuthenticator(bearer_token)
     elif use_bearer_token is not True:
-        authenticator = IAMAuthenticator(apikey)
+        authenticator = IAMAuthenticator(apikey=apikey, url=iam_url)
     else:
         iam_token_manager = IAMTokenManager(apikey=apikey)
         bearer_token = iam_token_manager.get_token()
