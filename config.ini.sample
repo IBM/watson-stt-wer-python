@@ -5,6 +5,8 @@ service_url=https://....
 #use_bearer_token=False is for IBM cloud, uses apikey as an apikey
 #use_bearer_token=True is for Cloud Pak installs, instructs tool to use apikey to fetch a bearer_token
 use_bearer_token=False
+#Specify a different iam_url only if you are using a non-IBM Cloud IAM endpoint
+#iam_url=https://iam.cloud.ibm.com
 
 ;max_threads=20
 
