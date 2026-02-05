@@ -70,8 +70,13 @@ class MyRecognizeCallback(RecognizeCallback):
             transcription = ""
             for result in data['results']:
                 transcription += result["alternatives"][0]["transcript"]
-            #print(transcription)
-            self.transcriptions.add(self.audio_file_name, transcription)
+                
+            # print(self.audio_file_name + " -- " + transcription+"\n\n")
+            if self.audio_file_name not in self.transcriptions.getData():
+                self.transcriptions.add(self.audio_file_name, transcription)
+            else:
+                transcription = self.transcriptions.getData()[self.audio_file_name]+ " " + transcription
+                self.transcriptions.add(self.audio_file_name, transcription)
         except KeyError as e:
             logging.exception(f"{self.audio_file_name} - Missing key(s) in transcription data: {e}")
         except Exception as e:
@@ -304,7 +309,7 @@ def run(config_file:str, logging_level:str=DEFAULT_LOGLEVEL):
             futures = [executor.submit(transcriber.transcribe, file) for file in files]
             for future in concurrent.futures.as_completed(futures):
                 complete_files+=1
-                if complete_files%100==0:
+                if complete_files%10==0:
                     logging.info(f"Completed transcribing {complete_files} files out of {total_files}")
     
         if complete_files != total_files:
